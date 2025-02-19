@@ -87,7 +87,7 @@
       (necesita ?p ?t)
     )
     :effect (
-      and (tiene p1 comida) 
+      and (tiene ?p ?t) 
       (not (sostiene-izq ?d ?c)) 
       (not (necesita ?p ?t)) 
       (brazo-izq-libre ?d)
