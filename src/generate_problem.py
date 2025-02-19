@@ -300,8 +300,9 @@ def main():
             f.write("\n")
         
         cajas = setup_content_types(options)
-        for c in crate:
-            f.write("\tcaja-en " + c + " - deposito\n")
+        for l in cajas:
+            for c in l:
+                f.write("\tcontiene " + c + " - deposito\n")
 
         
         
