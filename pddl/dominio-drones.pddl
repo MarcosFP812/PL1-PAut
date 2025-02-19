@@ -2,7 +2,8 @@
   (:requirements :strips :typing)
 
   (:types
-    dron persona localizacion caja contenido)
+    dron persona localizacion caja contenido brazo
+  )
 
   (:predicates
     (dron-en ?d - dron ?l - localizacion)
@@ -10,8 +11,7 @@
     (persona-en ?p - persona ?l - localizacion)
     (sostiene-izq ?d - dron ?c - caja)
     (sostiene-der ?d - dron ?c - caja)
-    (brazo-izq-libre ?d - dron)
-    (brazo-der-libre ?d - dron)
+    (brazo-libre ?d - dron ?b - brazo)
     (necesita ?p - persona ?t - contenido)
     (tiene ?p - persona ?t - contenido)
     (contiene ?c - caja ?t - contenido))

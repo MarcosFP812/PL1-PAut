@@ -6,7 +6,8 @@
     p1 p2 p3 p4 - persona
     deposito l1 l2 l3 l4 - localizacion
     c1 c2 c3 c4 c5 c6 c7 - caja
-    comida medicina agua - contenido)
+    comida medicina agua - contenido
+  )
 
   (:init
     ;; Ubicación inicial del dron y las cajas en el depósito

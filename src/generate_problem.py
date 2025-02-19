@@ -219,17 +219,19 @@ def main():
     carrier = []
     location = []
 
-    location.append("depot")
+    location.append("deposito")
     for x in range(options.locations):
         location.append("loc" + str(x + 1))
     for x in range(options.drones):
-        drone.append("drone" + str(x + 1))
+        drone.append("dron" + str(x + 1))
     for x in range(options.carriers):
-        carrier.append("carrier" + str(x + 1))
+        carrier.append("caja" + str(x + 1))
     for x in range(options.persons):
-        person.append("person" + str(x + 1))
+        person.append("pers" + str(x + 1))
+    """
     for x in range(options.crates):
         crate.append("crate" + str(x + 1))
+    """
     
     # Determine the set of crates for each content.
     # If content_types[0] is "food",
@@ -264,26 +266,25 @@ def main():
         ######################################################################
         # Write objects
 
-        # TODO: Change the type names below (drone, location, ...)
-        # to suit your domain.
-
         for x in drone:
-            f.write("\t" + x + " - drone\n")
+            f.write("\t" + x + " - dron\n")
 
         for x in location:
-            f.write("\t" + x + " - location\n")
+            f.write("\t" + x + " - localizacion\n")
 
         for x in crate:
-            f.write("\t" + x + " - crate\n")
+            f.write("\t" + x + " - caja\n")
 
         for x in content_types:
-            f.write("\t" + x + " - contents\n")
+            f.write("\t" + x + " - contenido\n")
 
         for x in person:
-            f.write("\t" + x + " - person\n")
+            f.write("\t" + x + " - persona\n")
+
 
         for x in carrier:
-            f.write("\t" + x + " - carrier\n")
+            f.write("\t" + x + " - brazo\n")
+        
 
         f.write(")\n")
 
@@ -292,7 +293,19 @@ def main():
 
         f.write("(:init\n")
 
-        # TODO: Initialize all facts here!
+        for d in drone:
+            f.write("\tdron-en " + d + " - deposito\n")
+            for b ins carrier:
+                f.write("\tbrazo-libre " + d + " - "+ b +"\n")
+            f.write("\n")
+        
+        cajas = setup_content_types(options)
+        for c in crate:
+            f.write("\tcaja-en " + c + " - deposito\n")
+
+        
+        
+
 
         f.write(")\n")
 
