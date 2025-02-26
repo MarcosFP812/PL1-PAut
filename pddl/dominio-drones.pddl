@@ -2,23 +2,13 @@
   (:requirements :strips :typing)
 
   (:types
-<<<<<<< HEAD
-    dron persona localizacion caja contenido brazo
-  )
-=======
     dron persona localizacion caja contenido brazo)
->>>>>>> 1849b66f5638020fd894f28fc871bc8a9a5b84d9
 
   (:predicates
     (dron-en ?d - dron ?l - localizacion)
     (caja-en ?c - caja ?l - localizacion)
     (persona-en ?p - persona ?l - localizacion)
-<<<<<<< HEAD
-    (sostiene-izq ?d - dron ?c - caja)
-    (sostiene-der ?d - dron ?c - caja)
-=======
     (sostiene ?d - dron ?b - brazo ?c - caja)
->>>>>>> 1849b66f5638020fd894f28fc871bc8a9a5b84d9
     (brazo-libre ?d - dron ?b - brazo)
     (necesita ?p - persona ?t - contenido)
     (tiene ?p - persona ?t - contenido)

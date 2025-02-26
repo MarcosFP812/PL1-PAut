@@ -103,7 +103,7 @@ def setup_content_types(options):
     for x in range(len(content_types)):
         crates = []
         for y in range(num_crates_with_contents[x]):
-            crates.append("crate" + str(counter))
+            crates.append("caja" + str(counter))
             counter += 1
         crates_with_contents.append(crates)
 
@@ -225,13 +225,12 @@ def main():
     for x in range(options.drones):
         drone.append("dron" + str(x + 1))
     for x in range(options.carriers):
-        carrier.append("caja" + str(x + 1))
+        carrier.append("brazo" + str(x + 1))
     for x in range(options.persons):
         person.append("pers" + str(x + 1))
-    """
     for x in range(options.crates):
-        crate.append("crate" + str(x + 1))
-    """
+        crate.append("caja" + str(x + 1))
+    
     
     # Determine the set of crates for each content.
     # If content_types[0] is "food",
@@ -260,35 +259,34 @@ def main():
         # Write the initial part of the problem
 
         f.write("(define (problem " + problem_name + ")\n")
-        f.write("(:domain drone-domain)\n")
+        f.write("(:domain dominio-drones)\n")
         f.write("(:objects\n")
 
         ######################################################################
         # Write objects
-
+        f.write("\t")
         for x in drone:
             f.write(x + " ")
         f.write("- dron\n")
-
+        f.write("\t")
         for x in location:
             f.write(x + " ")
         f.write("- localizacion\n")
-
+        f.write("\t")
         for x in crate:
-            print(x," juan")
             f.write(x + " ")
         f.write("- caja\n")
-
+        f.write("\t")
         for x in content_types:
             f.write(x + " ")
         f.write("- contenido\n")
-
+        f.write("\t")
         for x in person:
             f.write(x + " ")
         f.write("- persona\n")
-
+        f.write("\t")
         for x in carrier:
-            f.write( x + " ")
+            f.write(x + " ")
         f.write("- brazo\n")  
 
         f.write(")\n")
@@ -299,21 +297,26 @@ def main():
         f.write("(:init\n")
 
         for d in drone:
-            f.write("\tdron-en " + d + " - deposito\n")
+            f.write("\t(dron-en " + d + " deposito)\n")
             for b in carrier:
-                f.write("\tbrazo-libre " + d + " - "+ b +"\n")
+                f.write("\t(brazo-libre " + d + " "+ b +")\n")
             f.write("\n")
         
-        cajas = setup_content_types(options)
-        for l in cajas:
-            for c in l:
-                print(l, c)
-                #f.write("caja-en " + c + " - deposito\n")
+        for c in crates_with_contents[0]:
+            f.write("\t(caja-en "+c+" deposito)")
+            f.write("(contiene "+c+" comida)\n")
 
+        for c in crates_with_contents[1]:
+            f.write("\t(caja-en "+c+" deposito)")
+            f.write("(contiene "+c+" medicina)\n")
+
+        for i, p in enumerate(need):
+            f.write(f"\t(persona-en pers{i+1} loc{i+1})")
+            if (p[0]):
+                f.write(f"(necesita pers{i+1} comida)\n")
+            if (p[1]):
+                f.write(f"(necesita pers{i+1} medicina)\n")
         
-        
-
-
         f.write(")\n")
 
         ######################################################################
@@ -323,16 +326,14 @@ def main():
 
         # All Drones should end up at the depot
         for d in drone:
-            f.write("\tdron-en " + d + " - deposito\n")
-
+            f.write("\t(dron-en " + d + " deposito)\n")
 
         for x in range(options.persons):
             for y in range(len(content_types)):
                 if need[x][y]:
                     person_name = person[x]
                     content_name = content_types[y]
-                    # TODO: write a goal that the person needs a crate
-                    # with this specific content
+                    f.write("\t(tiene "+person_name+" "+content_name+")\n")
 
         f.write("\t))\n")
         f.write(")\n")
