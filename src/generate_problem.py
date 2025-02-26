@@ -267,24 +267,29 @@ def main():
         # Write objects
 
         for x in drone:
-            f.write("\t" + x + " - dron\n")
+            f.write(x + " ")
+        f.write("- dron\n")
 
         for x in location:
-            f.write("\t" + x + " - localizacion\n")
+            f.write(x + " ")
+        f.write("- localizacion\n")
 
         for x in crate:
-            f.write("\t" + x + " - caja\n")
+            print(x," juan")
+            f.write(x + " ")
+        f.write("- caja\n")
 
         for x in content_types:
-            f.write("\t" + x + " - contenido\n")
+            f.write(x + " ")
+        f.write("- contenido\n")
 
         for x in person:
-            f.write("\t" + x + " - persona\n")
-
+            f.write(x + " ")
+        f.write("- persona\n")
 
         for x in carrier:
-            f.write("\t" + x + " - brazo\n")
-        
+            f.write( x + " ")
+        f.write("- brazo\n")  
 
         f.write(")\n")
 
@@ -295,14 +300,15 @@ def main():
 
         for d in drone:
             f.write("\tdron-en " + d + " - deposito\n")
-            for b ins carrier:
+            for b in carrier:
                 f.write("\tbrazo-libre " + d + " - "+ b +"\n")
             f.write("\n")
         
         cajas = setup_content_types(options)
         for l in cajas:
             for c in l:
-                f.write("\tcontiene " + c + " - deposito\n")
+                print(l, c)
+                #f.write("caja-en " + c + " - deposito\n")
 
         
         
@@ -316,9 +322,9 @@ def main():
         f.write("(:goal (and\n")
 
         # All Drones should end up at the depot
-        for x in drone:
-            f.write("\n")
-            # TODO: Write a goal that the drone x is at the depot
+        for d in drone:
+            f.write("\tdron-en " + d + " - deposito\n")
+
 
         for x in range(options.persons):
             for y in range(len(content_types)):
