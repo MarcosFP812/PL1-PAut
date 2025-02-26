@@ -128,8 +128,8 @@
     :precondition ( 
       < (combustible ?d) (max-combustible)
     )
-    :effect ( 
-      assign (combustible ?d) (max-combustible)
+    :effect (and
+      (assign (combustible ?d) max-combustible)
     )
   )
 
