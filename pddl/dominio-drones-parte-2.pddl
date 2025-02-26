@@ -26,6 +26,8 @@
     (cajas-en-contenedor ?k - contenedor)
     (limite-contenedor)
     (fly-cost ?l1 ?l2 - localizacion)
+    (combustible ?d)
+    (max-combustible)
     (total-cost)
   )
 
@@ -108,13 +110,26 @@
       ?from - localizacion 
       ?to - localizacion
     )
-    :precondition (
-      dron-en ?d ?from
+    :precondition (and
+      (dron-en ?d ?from)
+      (>= (combustible) (fly-cost ?from ?to))
     )
     :effect (
       and (not (dron-en ?d ?from)) 
       (dron-en ?d ?to)
       (increase (total-cost) (fly-cost ?from ?to))
+    )
+  )
+
+  (:action repostar
+    :parameters (
+      ?d - dron
+    )
+    :precondition ( 
+      < (combustible ?d) (max-combustible)
+    )
+    :effect ( 
+      assign (combustible ?d) (max-combustible)
     )
   )
 

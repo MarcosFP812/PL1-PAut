@@ -48,6 +48,8 @@
     (= (cajas-en-contenedor k1) 0)
     (= (brazos-ocupados d1) 0)
     (= (limite-contenedor k1) 4)
+    (= (combustible d1) 150)
+    (= (max-combustible) 150)
   )
 
   (:goal 
