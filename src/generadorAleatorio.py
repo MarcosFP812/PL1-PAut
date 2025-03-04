@@ -343,7 +343,8 @@ def main():
             if needs_medicine:
                 f.write(f"\t(tiene {p} medicina)\n")
 
-        f.write("))\n")
+        f.write("\t))\n")
+        f.write(")\n")
 
 if __name__ == '__main__':
     main()
