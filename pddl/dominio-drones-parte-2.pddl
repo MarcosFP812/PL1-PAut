@@ -129,7 +129,7 @@
       < (combustible ?d) (max-combustible)
     )
     :effect (and
-      (assign (combustible ?d) max-combustible)
+      (assign (combustible ?d) (max-combustible))
     )
   )
 
