@@ -99,7 +99,7 @@
       and (en-contenedor ?d ?k ?c) 
       (not (caja-en ?c ?l)) 
       (not (brazos-libres ?d))
-      (increase (cajas-en-contenedor ?d) 1)
+      (increase (cajas-en-contenedor ?k) 1)
     )
   )
 
@@ -112,7 +112,7 @@
     )
     :precondition (and
       (dron-en ?d ?from)
-      (>= (combustible) (fly-cost ?from ?to))
+      (>= (combustible ?d) (fly-cost ?from ?to))
     )
     :effect (
       and (not (dron-en ?d ?from)) 
@@ -129,7 +129,7 @@
       < (combustible ?d) (max-combustible)
     )
     :effect (and
-      (assign (combustible ?d) max-combustible)
+      (assign (combustible ?d) (max-combustible))
     )
   )
 
