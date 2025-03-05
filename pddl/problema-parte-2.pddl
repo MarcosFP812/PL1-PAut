@@ -28,6 +28,8 @@
     (persona-en p3 l3) (necesita p3 comida)
     (persona-en p4 l4) (necesita p4 comida)
 
+    ;;Meter contenedores
+
     ;; Coste vuelo entre localizaciones
     (= (fly-cost l1 l2) 122)
     (= (fly-cost l1 l3) 193)

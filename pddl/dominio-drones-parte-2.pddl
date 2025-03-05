@@ -8,20 +8,22 @@
     (dron-en ?d - dron ?l - localizacion)
     (caja-en ?c - caja ?l - localizacion)
     (persona-en ?p - persona ?l - localizacion)
+    (en-deposito ?l - localizacion)
 
     (necesita ?p - persona ?t - contenido)
     (tiene ?p - persona ?t - contenido)
     (contiene ?c - caja ?t - contenido)
+    (contenedor-libre ?k)
 
     (tiene-contenedor ?d - dron ?k - contenedor)
-    (en-contenedor ?d - dron ?k - contenedor ?c - caja)
+    (en-contenedor ?k - contenedor ?c - caja)
     (dron-libre ?d - dron)
   )
 
   (:functions
     (cajas-en-contenedor ?k - contenedor)
     (limite-contenedor)
-    (fly-cost ?l1 ?l2 - localizacion)
+    (fly-cost ?l1 - localizacion ?l2 - localizacion)
     (combustible ?d)
     (max-combustible)
     (total-cost)
@@ -31,29 +33,38 @@
     :parameters (
       ?d - dron 
       ?k - contenedor 
+      ?l - localizacion
     )
     :precondition (and
       (= (cajas-en-contenedor ?k) 0)
+      (dron-en ?d ?l)
+      (en-deposito ?l)
       (dron-libre ?d)
+      (contenedor-libre ?k)
     )
     :effect (and
       (tiene-contenedor ?d ?k)
       (not (dron-libre ?d))
+      (not (contenedor-libre ?k))
     )
   )
 
-  (:action dejar-contenedor
+  (:action dejar
     :parameters (
       ?d - dron 
       ?k - contenedor 
+      ?l - localizacion
     )
     :precondition (and
+      (dron-en ?d ?l)
+      (en-deposito ?l)
       (tiene-contenedor ?d ?k)
       (= (cajas-en-contenedor ?k) 0)
     )
     :effect (and
       (not (tiene-contenedor ?d ?k))
       (dron-libre ?d)
+      (contenedor-libre ?k)
     )
   )
 
@@ -71,7 +82,7 @@
       (< (cajas-en-contenedor ?k) (limite-contenedor))
     )
     :effect (
-      and (en-contenedor ?d ?k ?c) 
+      and (en-contenedor ?k ?c) 
       (not (caja-en ?c ?l)) 
       (increase (cajas-en-contenedor ?k) 1)
     )
@@ -107,7 +118,7 @@
     )
   )
 
-  (:action entregar-contenedor
+  (:action entregar
     :parameters (
       ?d - dron 
       ?c - caja 
@@ -117,7 +128,7 @@
       ?t - contenido
     )
     :precondition (
-      and (en-contenedor ?d ?k ?c) 
+      and (en-contenedor ?k ?c) 
       (dron-en ?d ?l) 
       (persona-en ?p ?l)              
       (contiene ?c ?t) 
@@ -125,7 +136,7 @@
     )
     :effect (
       and (tiene ?p ?t) 
-      (not (en-contenedor ?d ?k ?c)) 
+      (not (en-contenedor ?k ?c)) 
       (not (necesita ?p ?t))
       (decrease (cajas-en-contenedor ?k) 1)
     )
