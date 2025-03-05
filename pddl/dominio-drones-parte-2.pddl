@@ -112,7 +112,7 @@
     )
     :precondition (and
       (dron-en ?d ?from)
-      (>= (combustible) (fly-cost ?from ?to))
+      (>= (combustible ?d) (fly-cost ?from ?to))
     )
     :effect (
       and (not (dron-en ?d ?from)) 
