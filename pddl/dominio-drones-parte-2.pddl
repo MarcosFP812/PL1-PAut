@@ -2,16 +2,12 @@
   (:requirements :strips :typing :action-costs)
 
   (:types
-    dron persona localizacion caja contenido brazo contenedor)
+    dron persona localizacion caja contenido contenedor)
 
   (:predicates
     (dron-en ?d - dron ?l - localizacion)
     (caja-en ?c - caja ?l - localizacion)
     (persona-en ?p - persona ?l - localizacion)
-    (sostiene ?d - dron ?b - brazo ?c - caja)
-    (brazo-libre ?d - dron ?b - brazo)
-
-    (brazos-libres ?d - dron)
 
     (necesita ?p - persona ?t - contenido)
     (tiene ?p - persona ?t - contenido)
@@ -19,10 +15,10 @@
 
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?d - dron ?k - contenedor ?c - caja)
+    (dron-libre ?d - dron)
   )
 
   (:functions
-    (brazos-ocupados ?d - dron)
     (cajas-en-contenedor ?k - contenedor)
     (limite-contenedor)
     (fly-cost ?l1 ?l2 - localizacion)
@@ -31,40 +27,18 @@
     (total-cost)
   )
 
-  (:action coger
-    :parameters (
-      ?d - dron 
-      ?c - caja 
-      ?l - localizacion
-      ?b - brazo
-    )
-    :precondition (
-      and (dron-en ?d ?l) 
-      (caja-en ?c ?l) 
-      (brazo-libre ?d ?b)
-      (brazos-libres ?d)
-    )
-    :effect (
-      and (sostiene ?d ?b ?c) 
-      (not (caja-en ?c ?l)) 
-      (not (brazo-libre ?d ?b))
-      (increase (brazos-ocupados ?d) 1)
-    )
-  )
-
   (:action coger-contenedor
     :parameters (
       ?d - dron 
       ?k - contenedor 
     )
-    :precondition (
-      and (= (brazos-ocupados ?d) 0)
+    :precondition (and
       (= (cajas-en-contenedor ?k) 0)
-      (brazos-libres ?d)
+      (dron-libre ?d)
     )
     :effect (and
       (tiene-contenedor ?d ?k)
-      (not (brazos-libres ?d))
+      (not (dron-libre ?d))
     )
   )
 
@@ -79,7 +53,7 @@
     )
     :effect (and
       (not (tiene-contenedor ?d ?k))
-      (brazos-libres ?d)
+      (dron-libre ?d)
     )
   )
 
@@ -130,32 +104,6 @@
     )
     :effect (and
       (assign (combustible ?d) (max-combustible))
-    )
-  )
-
-
-  (:action entregar-brazo
-    :parameters (
-      ?d - dron 
-      ?c - caja 
-      ?b - brazo
-      ?p - persona 
-      ?l - localizacion 
-      ?t - contenido
-    )
-    :precondition (
-      and (sostiene ?d ?b ?c) 
-      (dron-en ?d ?l) 
-      (persona-en ?p ?l)              
-      (contiene ?c ?t) 
-      (necesita ?p ?t)
-    )
-    :effect (
-      and (tiene ?p ?t) 
-      (not (sostiene ?d ?b ?c)) 
-      (not (necesita ?p ?t)) 
-      (brazo-libre ?d ?b)
-      (decrease (brazos-ocupados ?d) 1)
     )
   )
 

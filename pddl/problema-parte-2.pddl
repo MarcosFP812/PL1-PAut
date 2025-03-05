@@ -3,7 +3,6 @@
   
   (:objects
     d1 - dron
-    b1 b2 - brazo
     p1 p2 p3 p4 - persona
     deposito l1 l2 l3 l4 - localizacion
     c1 c2 c3 c4 c5 c6 c7 - caja
@@ -13,9 +12,7 @@
   (:init
     ;; Ubicación inicial del dron y las cajas en el depósito
     (dron-en d1 deposito)
-    (brazo-libre d1 b1)
-    (brazo-libre d1 b2)
-    (brazos-libres d1)
+    (dron-libre d1)
 
     (caja-en c1 deposito) (contiene c1 comida)
     (caja-en c2 deposito) (contiene c2 medicina)
@@ -47,7 +44,6 @@
     (= (total-cost) 0)
 
     (= (cajas-en-contenedor k1) 0)
-    (= (brazos-ocupados d1) 0)
     (= (limite-contenedor) 4)
     (= (combustible d1) 150)
     (= (max-combustible) 200)
