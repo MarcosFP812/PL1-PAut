@@ -60,6 +60,7 @@
     :precondition (
       and (= (brazos-ocupados ?d) 0)
       (= (cajas-en-contenedor ?k) 0)
+      (brazos-libres ?d)
     )
     :effect (and
       (tiene-contenedor ?d ?k)
@@ -93,12 +94,11 @@
       and (dron-en ?d ?l) 
       (tiene-contenedor ?d ?k)
       (caja-en ?c ?l) 
-      (< (limite-contenedor) (cajas-en-contenedor ?k))
+      (< (cajas-en-contenedor ?k) (limite-contenedor))
     )
     :effect (
       and (en-contenedor ?d ?k ?c) 
       (not (caja-en ?c ?l)) 
-      (not (brazos-libres ?d))
       (increase (cajas-en-contenedor ?k) 1)
     )
   )

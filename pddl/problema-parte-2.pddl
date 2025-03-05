@@ -15,6 +15,7 @@
     (dron-en d1 deposito)
     (brazo-libre d1 b1)
     (brazo-libre d1 b2)
+    (brazos-libres d1)
 
     (caja-en c1 deposito) (contiene c1 comida)
     (caja-en c2 deposito) (contiene c2 medicina)
@@ -49,7 +50,7 @@
     (= (brazos-ocupados d1) 0)
     (= (limite-contenedor) 4)
     (= (combustible d1) 150)
-    (= (max-combustible) 150)
+    (= (max-combustible) 200)
   )
 
   (:goal 
