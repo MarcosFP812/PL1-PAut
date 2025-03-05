@@ -14,6 +14,11 @@
     (dron-en d1 deposito)
     (dron-libre d1)
 
+    (en-deposito deposito)
+
+    ;;Ubicacion contenedores y cajas
+    (contenedor-libre k1)
+
     (caja-en c1 deposito) (contiene c1 comida)
     (caja-en c2 deposito) (contiene c2 medicina)
     (caja-en c3 deposito) (contiene c3 comida)
@@ -28,27 +33,30 @@
     (persona-en p3 l3) (necesita p3 comida)
     (persona-en p4 l4) (necesita p4 comida)
 
-    ;;Meter contenedores
-
     ;; Coste vuelo entre localizaciones
-    (= (fly-cost l1 l2) 122)
-    (= (fly-cost l1 l3) 193)
-    (= (fly-cost l1 l4) 140)
-    (= (fly-cost l2 l1) 100)
-    (= (fly-cost l2 l3) 102)
-    (= (fly-cost l2 l4) 141)
-    (= (fly-cost l3 l1) 126)
-    (= (fly-cost l3 l2) 143)
-    (= (fly-cost l3 l4) 125)
-    (= (fly-cost l4 l1) 121)
-    (= (fly-cost l4 l2) 162)
-    (= (fly-cost l4 l3) 147)
+    (= (fly-cost deposito l1) 30)
+    (= (fly-cost deposito l2) 20)
+    (= (fly-cost deposito l3) 15)
+    (= (fly-cost deposito l4) 10)
+
+    (= (fly-cost l1 l2) 12)
+    (= (fly-cost l1 l3) 19)
+    (= (fly-cost l1 l4) 14)
+    (= (fly-cost l2 l1) 15)
+    (= (fly-cost l2 l3) 20)
+    (= (fly-cost l2 l4) 41)
+    (= (fly-cost l3 l1) 26)
+    (= (fly-cost l3 l2) 43)
+    (= (fly-cost l3 l4) 25)
+    (= (fly-cost l4 l1) 21)
+    (= (fly-cost l4 l2) 32)
+    (= (fly-cost l4 l3) 47)
     (= (total-cost) 0)
 
     (= (cajas-en-contenedor k1) 0)
     (= (limite-contenedor) 4)
-    (= (combustible d1) 150)
-    (= (max-combustible) 200)
+    (= (combustible d1) 50)
+    (= (max-combustible) 100)
   )
 
   (:goal 

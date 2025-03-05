@@ -29,14 +29,14 @@
     (total-cost)
   )
 
-  (:action coger-contenedor
+  ;; acciones contenedor
+  (:action coger
     :parameters (
       ?d - dron 
       ?k - contenedor 
       ?l - localizacion
     )
     :precondition (and
-      (= (cajas-en-contenedor ?k) 0)
       (dron-en ?d ?l)
       (en-deposito ?l)
       (dron-libre ?d)
@@ -68,6 +68,7 @@
     )
   )
 
+  ;; acciones caja y vuelo
   (:action meter
     :parameters (
       ?d - dron 
@@ -103,15 +104,19 @@
       and (not (dron-en ?d ?from)) 
       (dron-en ?d ?to)
       (increase (total-cost) (fly-cost ?from ?to))
+      (decrease (combustible ?d) (fly-cost ?from ?to))
     )
   )
 
   (:action repostar
     :parameters (
       ?d - dron
+      ?l - localizacion
     )
-    :precondition ( 
-      < (combustible ?d) (max-combustible)
+    :precondition ( and
+      (en-deposito ?l)
+      (dron-en ?d ?l)
+      (< (combustible ?d) (max-combustible))
     )
     :effect (and
       (assign (combustible ?d) (max-combustible))
