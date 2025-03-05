@@ -99,7 +99,7 @@
       and (en-contenedor ?d ?k ?c) 
       (not (caja-en ?c ?l)) 
       (not (brazos-libres ?d))
-      (increase (cajas-en-contenedor ?d) 1)
+      (increase (cajas-en-contenedor ?k) 1)
     )
   )
 
