@@ -24,7 +24,7 @@ def time_limit(seconds):
     finally:
         signal.alarm(0)
 
-def find_newest_problem_file(directory="src"):
+def find_newest_problem_file(directory="parte1/generadores"):
     """Find the most recently created problem file in the specified directory."""
     problem_files = glob.glob(f"drone_problem_*.pddl")
     if not problem_files:
@@ -39,10 +39,11 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
     """Generate a PDDL problem file with the given parameters."""
     
     # Get list of files before generation
-    before_files = set(glob.glob("drone_problem_*.pddl"))
+    before_files = set(glob.glob("parte1/problemasGenerados/drone_problem_*.pddl"))
+    
     
     cmd = [
-        "python3", "src/generate_problem.py",
+        "python3", "parte1/generadores/generadorAleatorio.py",
         "--drones", str(drones),
         "--carriers", str(carriers),
         "--locations", str(locations),
@@ -62,7 +63,7 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
         
         
         # Get list of files after generation
-        after_files = set(glob.glob("drone_problem_*.pddl"))
+        after_files = set(glob.glob("parte1/problemasGenerados/drone_problem_*.pddl"))
         
         # Find new files
         new_files = after_files - before_files
@@ -179,8 +180,8 @@ def delete_problem_file(problem_file):
         print(f"Eliminado: {file}")
 
 
-def plot_results(sizes, times, solutions_found, max_size):
-    """Create a plot of problem size vs. execution time."""
+def plot_results(sizes, times, solutions_found, max_size, planner_name):
+    """Create a plot of problem size vs. execution time, customized per planner."""
     plt.figure(figsize=(10, 6))
     
     # Plot all points
@@ -192,7 +193,7 @@ def plot_results(sizes, times, solutions_found, max_size):
     
     plt.axhline(y=60, color='r', linestyle='--', label='Time Limit (60s)')
     
-    title = 'PDDL Planner Performance'
+    title = f'PDDL Planner Performance ({planner_name})'
     if max_size is not None:
         title += f' (Max Solvable Size: {max_size})'
     plt.title(title)
@@ -202,7 +203,6 @@ def plot_results(sizes, times, solutions_found, max_size):
     plt.grid(True)
     
     # Create a custom legend
-    from matplotlib.lines import Line2D
     legend_elements = [
         Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Solution Found'),
         Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='No Solution'),
@@ -210,21 +210,26 @@ def plot_results(sizes, times, solutions_found, max_size):
     ]
     plt.legend(handles=legend_elements)
     
-    # Save the plot
-    plt.savefig('planner_performance.png')
-    print("Plot saved as 'planner_performance.png'")
+    # File names based on planner name
+    safe_planner_name = planner_name.replace(" ", "_").lower()  # Avoid spaces in filenames
+    plot_filename = f'planner_performance_{safe_planner_name}.png'
+    csv_filename = f'planner_results_{safe_planner_name}.csv'
 
-    # Also save results as CSV
-    with open('planner_results.csv', 'w') as f:
+    # Save the plot
+    plt.savefig(plot_filename)
+    print(f"Plot saved as '{plot_filename}'")
+
+    # Save results as CSV
+    with open(csv_filename, 'w') as f:
         f.write('Problem Size,Execution Time (s),Solution Found\n')
         for size, time_val, solved in zip(sizes, times, solutions_found):
             f.write(f'{size},{time_val},{1 if solved else 0}\n')
-    print("Results also saved as 'planner_results.csv'")
+    print(f"Results also saved as '{csv_filename}'")
 
 def main():
     parser = argparse.ArgumentParser(description='Run PDDL tests with increasing complexity')
-    parser.add_argument('--planner', default='planificadores/ff', help='Path to the planner executable')
-    parser.add_argument('--domain', default='pddl/dominio-drones.pddl', help='Path to the domain file')
+    parser.add_argument('--planner', default='parte1/planificadores/ff', help='Path to the planner executable')
+    parser.add_argument('--domain', default='parte1/pddl/dominio-drones.pddl', help='Path to the domain file')
     parser.add_argument('--start-size', type=int, default=2, help='Starting problem size')
     parser.add_argument('--max-size', type=int, default=100, help='Maximum problem size to try')
     parser.add_argument('--timeout', type=int, default=60, help='Timeout in seconds')
@@ -232,11 +237,14 @@ def main():
     
     args = parser.parse_args()
     
+    # SACO EL NOMBRE DEL PLANIFICADOR
+    planner_name = os.path.basename(args.planner)
+
     # Print current working directory and check file existence for debugging
     print(f"Current working directory: {os.getcwd()}")
     print(f"Planner exists: {os.path.exists(args.planner)}")
     print(f"Domain file exists: {os.path.exists(args.domain)}")
-    print(f"src directory exists: {os.path.exists('src')}")
+    print(f"parte1/problemasGenerados directory exists: {os.path.exists('parte1/problemasGenerados')}")
     
     sizes = []
     times = []
@@ -298,7 +306,7 @@ def main():
         print("-" * 80)
     
     if sizes and times:
-        plot_results(sizes, times, solutions_found, max_solvable_size)
+        plot_results(sizes, times, solutions_found, max_solvable_size, planner_name)
         if max_solvable_size:
             print(f"Maximum problem size solved within {args.timeout} seconds: {max_solvable_size}")
         else:

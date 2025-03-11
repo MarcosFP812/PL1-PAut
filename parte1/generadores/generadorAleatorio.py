@@ -14,6 +14,7 @@ from optparse import OptionParser
 import random
 import math
 import sys
+import os
 
 ########################################################################################
 # Hard-coded options
@@ -59,6 +60,15 @@ def distance(location_coords, location_num1, location_num2):
 def flight_cost(location_coords, location_num1, location_num2):
     return int(distance(location_coords, location_num1, location_num2)) + 1
 
+
+def nombreArchivoUnico(directorio, nombreBase, extension=".pddl"):
+    rutaArchivo = os.path.join(directorio, nombreBase + extension)
+    counter = 1
+
+    while os.path.exists(rutaArchivo):
+        rutaArchivo = os.path.join(directorio, nombreBase + "---" + str(counter) + extension)
+        counter += 1
+    return rutaArchivo
 
 # When you run this script you specify the *total* number of crates
 # you want.  The function below determines randomly which crates
@@ -254,13 +264,24 @@ def main():
                    "_l" + str(options.locations) + "_p" + str(options.persons) + "_c" + str(options.crates) + \
                    "_g" + str(options.goals) + "_ct" + str(len(content_types))
 
-    # Open output file
-    with open(problem_name + ".pddl", 'w') as f:
-        # Write the initial part of the problem
 
+    # Open output file
+    output_dir = "parte1/problemasGenerados/"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Define el nombre base del archivo
+    problem_name = f"drone_problem_d{options.drones}_r{options.carriers}_l{options.locations}_p{options.persons}_c{options.crates}_g{options.goals}_ct{len(content_types)}"
+
+    # Genera un nombre de archivo único en la carpeta de salida
+    file_path = nombreArchivoUnico(output_dir, problem_name)
+
+    # Guarda el archivo con un nombre único
+    with open(file_path, 'w') as f:
         f.write("(define (problem " + problem_name + ")\n")
         f.write("(:domain dominio-drones)\n")
         f.write("(:objects\n")
+        # Agregar aquí el contenido del archivo...
+
 
         ######################################################################
         # Write objects
@@ -310,6 +331,8 @@ def main():
             f.write(f"\t(dron-en {d} deposito)\n")
             for b in carrier:
                 f.write(f"\t(brazo-libre {d} {b})\n")
+
+
 
         # Asignar cajas a ubicaciones aleatorias y definir su contenido
         for c in crate:
