@@ -174,8 +174,8 @@ def delete_problem_file(problem_file):
         except Exception as e:
             print(f"Error deleting problem file {problem_file}: {e}")
 
-def plot_results(sizes, times, solutions_found, max_size):
-    """Create a plot of problem size vs. execution time."""
+def plot_results(sizes, times, solutions_found, max_size, planner_name):
+    """Create a plot of problem size vs. execution time, customized per planner."""
     plt.figure(figsize=(10, 6))
     
     # Plot all points
@@ -187,7 +187,7 @@ def plot_results(sizes, times, solutions_found, max_size):
     
     plt.axhline(y=60, color='r', linestyle='--', label='Time Limit (60s)')
     
-    title = 'PDDL Planner Performance'
+    title = f'PDDL Planner Performance ({planner_name})'
     if max_size is not None:
         title += f' (Max Solvable Size: {max_size})'
     plt.title(title)
@@ -197,7 +197,6 @@ def plot_results(sizes, times, solutions_found, max_size):
     plt.grid(True)
     
     # Create a custom legend
-    from matplotlib.lines import Line2D
     legend_elements = [
         Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Solution Found'),
         Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='No Solution'),
@@ -205,16 +204,21 @@ def plot_results(sizes, times, solutions_found, max_size):
     ]
     plt.legend(handles=legend_elements)
     
-    # Save the plot
-    plt.savefig('planner_performance.png')
-    print("Plot saved as 'planner_performance.png'")
+    # File names based on planner name
+    safe_planner_name = planner_name.replace(" ", "_").lower()  # Avoid spaces in filenames
+    plot_filename = f'planner_performance_{safe_planner_name}.png'
+    csv_filename = f'planner_results_{safe_planner_name}.csv'
 
-    # Also save results as CSV
-    with open('planner_results.csv', 'w') as f:
+    # Save the plot
+    plt.savefig(plot_filename)
+    print(f"Plot saved as '{plot_filename}'")
+
+    # Save results as CSV
+    with open(csv_filename, 'w') as f:
         f.write('Problem Size,Execution Time (s),Solution Found\n')
         for size, time_val, solved in zip(sizes, times, solutions_found):
             f.write(f'{size},{time_val},{1 if solved else 0}\n')
-    print("Results also saved as 'planner_results.csv'")
+    print(f"Results also saved as '{csv_filename}'")
 
 def main():
     parser = argparse.ArgumentParser(description='Run PDDL tests with increasing complexity')
@@ -227,6 +231,9 @@ def main():
     
     args = parser.parse_args()
     
+    # SACO EL NOMBRE DEL PLANIFICADOR
+    planner_name = os.path.basename(args.planner)
+
     # Print current working directory and check file existence for debugging
     print(f"Current working directory: {os.getcwd()}")
     print(f"Planner exists: {os.path.exists(args.planner)}")
@@ -293,7 +300,7 @@ def main():
         print("-" * 80)
     
     if sizes and times:
-        plot_results(sizes, times, solutions_found, max_solvable_size)
+        plot_results(sizes, times, solutions_found, max_solvable_size, planner_name)
         if max_solvable_size:
             print(f"Maximum problem size solved within {args.timeout} seconds: {max_solvable_size}")
         else:
