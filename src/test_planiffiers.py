@@ -80,6 +80,7 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
 
 def run_planner(domain_file, problem_file, planner_path, time_limit_seconds=60):
     """Run the planner with the given domain and problem files."""
+    print("Ejecutando comando... ")
     # Make sure files exist
     if not os.path.exists(domain_file):
         print(f"Domain file does not exist: {domain_file}")
@@ -99,7 +100,8 @@ def run_planner(domain_file, problem_file, planner_path, time_limit_seconds=60):
     
     # FF planner command
     if planner_path == "planificadores/lpg-td":
-        cmd = [planner_path, "-o", domain_file, "-f", problem_file, "-n", 1]
+        print("En lpg")
+        cmd = [planner_path, "-o", domain_file, "-f", problem_file, "-n", "1"]
     else: 
         cmd = [planner_path, "-o", domain_file, "-f", problem_file]
     
@@ -172,6 +174,10 @@ def delete_problem_file(problem_file):
             print(f"Deleted {problem_file}")
         except Exception as e:
             print(f"Error deleting problem file {problem_file}: {e}")
+    for file in glob.glob("*drone_problem*"):
+        os.remove(file)
+        print(f"Eliminado: {file}")
+
 
 def plot_results(sizes, times, solutions_found, max_size):
     """Create a plot of problem size vs. execution time."""
@@ -220,7 +226,7 @@ def main():
     parser.add_argument('--planner', default='planificadores/ff', help='Path to the planner executable')
     parser.add_argument('--domain', default='pddl/dominio-drones.pddl', help='Path to the domain file')
     parser.add_argument('--start-size', type=int, default=2, help='Starting problem size')
-    parser.add_argument('--max-size', type=int, default=20, help='Maximum problem size to try')
+    parser.add_argument('--max-size', type=int, default=100, help='Maximum problem size to try')
     parser.add_argument('--timeout', type=int, default=60, help='Timeout in seconds')
     parser.add_argument('--continue-on-fail', action='store_true', help='Continue testing even after failures')
     

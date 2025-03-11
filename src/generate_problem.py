@@ -296,35 +296,27 @@ def main():
 
         f.write("(:init\n")
 
-        # Asignar ubicaciones aleatorias a personas
-        person_locations = {p: random.choice(location[1:]) for p in person}
-        
-        # Asignar ubicaciones aleatorias a cajas
-        crate_locations = {c: random.choice(location[1:]) for c in crate}
-
-        # Asignar contenido aleatorio a cada caja
-        crate_contents = {c: random.choice(content_types) for c in crate}
-
-        # Inicializar drones en el depósito
         for d in drone:
-            f.write(f"\t(dron-en {d} deposito)\n")
+            f.write("\t(dron-en " + d + " deposito)\n")
             for b in carrier:
-                f.write(f"\t(brazo-libre {d} {b})\n")
+                f.write("\t(brazo-libre " + d + " "+ b +")\n")
+            f.write("\n")
+        
+        for c in crates_with_contents[0]:
+            f.write("\t(caja-en "+c+" deposito)")
+            f.write("(contiene "+c+" comida)\n")
 
-        # Asignar cajas a ubicaciones aleatorias y definir su contenido
-        for c in crate:
-            f.write(f"\t(caja-en {c} {crate_locations[c]}) (contiene {c} {crate_contents[c]})\n")
+        for c in crates_with_contents[1]:
+            f.write("\t(caja-en "+c+" deposito)")
+            f.write("(contiene "+c+" medicina)\n")
 
-        # Asignar personas a ubicaciones aleatorias y definir sus necesidades
-        person_needs = {p: (random.choice([True, False]), random.choice([True, False])) for p in person}
-
-        for p in person:
-            f.write(f"\t(persona-en {p} {person_locations[p]})\n")
-            if person_needs[p][0]:
-                f.write(f"\t(necesita {p} comida)\n")
-            if person_needs[p][1]:
-                f.write(f"\t(necesita {p} medicina)\n")
-
+        for i, p in enumerate(need):
+            f.write(f"\t(persona-en pers{i+1} loc{i+1})")
+            if (p[0]):
+                f.write(f"(necesita pers{i+1} comida)\n")
+            if (p[1]):
+                f.write(f"(necesita pers{i+1} medicina)\n")
+        
         f.write(")\n")
 
         ######################################################################
@@ -332,18 +324,20 @@ def main():
 
         f.write("(:goal (and\n")
 
-        # Todos los drones deben terminar en el depósito
+        # All Drones should end up at the depot
         for d in drone:
-            f.write(f"\t(dron-en {d} deposito)\n")
+            f.write("\t(dron-en " + d + " deposito)\n")
 
-        # Establecer objetivos basados en las necesidades asignadas
-        for p, (needs_food, needs_medicine) in person_needs.items():
-            if needs_food:
-                f.write(f"\t(tiene {p} comida)\n")
-            if needs_medicine:
-                f.write(f"\t(tiene {p} medicina)\n")
+        for x in range(options.persons):
+            for y in range(len(content_types)):
+                if need[x][y]:
+                    person_name = person[x]
+                    content_name = content_types[y]
+                    f.write("\t(tiene "+person_name+" "+content_name+")\n")
 
-        f.write("))\n")
+        f.write("\t))\n")
+        f.write(")\n")
+
 
 if __name__ == '__main__':
     main()
