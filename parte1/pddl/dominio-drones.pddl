@@ -24,6 +24,7 @@
     )
     :precondition (
       and (dron-en ?d ?l) 
+      ()
       (caja-en ?c ?l) 
       (brazo-libre ?d ?b)
     )

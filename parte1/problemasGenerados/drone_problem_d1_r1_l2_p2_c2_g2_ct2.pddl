@@ -1,0 +1,26 @@
+(define (problem drone_problem_d1_r1_l2_p2_c2_g2_ct2)
+(:domain dominio-drones)
+(:objects
+	dron1 - dron
+	deposito loc1 loc2 - localizacion
+	caja1 caja2 - caja
+	comida medicina - contenido
+	pers1 pers2 - persona
+	brazo1 - brazo
+)
+(:init
+	(dron-en dron1 deposito)
+	(brazo-libre dron1 brazo1)
+	(caja-en caja1 loc2) (contiene caja1 medicina)
+	(caja-en caja2 loc2) (contiene caja2 medicina)
+	(persona-en pers1 loc2)
+	(persona-en pers2 loc2)
+	(necesita pers2 comida)
+	(necesita pers2 medicina)
+)
+(:goal (and
+	(dron-en dron1 deposito)
+	(tiene pers2 comida)
+	(tiene pers2 medicina)
+	))
+)

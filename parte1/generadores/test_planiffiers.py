@@ -24,7 +24,7 @@ def time_limit(seconds):
     finally:
         signal.alarm(0)
 
-def find_newest_problem_file(directory="src"):
+def find_newest_problem_file(directory="parte1/generadores"):
     """Find the most recently created problem file in the specified directory."""
     problem_files = glob.glob(f"drone_problem_*.pddl")
     if not problem_files:
@@ -39,10 +39,11 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
     """Generate a PDDL problem file with the given parameters."""
     
     # Get list of files before generation
-    before_files = set(glob.glob("drone_problem_*.pddl"))
+    before_files = set(glob.glob("parte1/problemasGenerados/drone_problem_*.pddl"))
+    
     
     cmd = [
-        "python3", "src/generate_problem.py",
+        "python3", "parte1/generadores/generadorAleatorio.py",
         "--drones", str(drones),
         "--carriers", str(carriers),
         "--locations", str(locations),
@@ -62,7 +63,7 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
         
         
         # Get list of files after generation
-        after_files = set(glob.glob("drone_problem_*.pddl"))
+        after_files = set(glob.glob("parte1/problemasGenerados/drone_problem_*.pddl"))
         
         # Find new files
         new_files = after_files - before_files
@@ -217,8 +218,8 @@ def plot_results(sizes, times, solutions_found, max_size):
 
 def main():
     parser = argparse.ArgumentParser(description='Run PDDL tests with increasing complexity')
-    parser.add_argument('--planner', default='planificadores/ff', help='Path to the planner executable')
-    parser.add_argument('--domain', default='pddl/dominio-drones.pddl', help='Path to the domain file')
+    parser.add_argument('--planner', default='parte1/planificadores/ff', help='Path to the planner executable')
+    parser.add_argument('--domain', default='parte1/pddl/dominio-drones.pddl', help='Path to the domain file')
     parser.add_argument('--start-size', type=int, default=2, help='Starting problem size')
     parser.add_argument('--max-size', type=int, default=20, help='Maximum problem size to try')
     parser.add_argument('--timeout', type=int, default=60, help='Timeout in seconds')
@@ -230,7 +231,7 @@ def main():
     print(f"Current working directory: {os.getcwd()}")
     print(f"Planner exists: {os.path.exists(args.planner)}")
     print(f"Domain file exists: {os.path.exists(args.domain)}")
-    print(f"src directory exists: {os.path.exists('src')}")
+    print(f"parte1/problemasGenerados directory exists: {os.path.exists('parte1/problemasGenerados')}")
     
     sizes = []
     times = []
