@@ -1,5 +1,5 @@
 python3 src/test_planiffiers.py \
-    --planner 'planificadores/lpg-td' \
+    --planner 'planificadores/ff' \
     --domain 'pddl/dominio-drones.pddl' \
     --start 2 \
     --max-size 100 \
