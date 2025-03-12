@@ -26,7 +26,7 @@ def time_limit(seconds):
 
 def find_newest_problem_file(directory="src"):
     """Find the most recently created problem file in the specified directory."""
-    problem_files = glob.glob(f"drone_problem_*.pddl")
+    problem_files = glob.glob(f"problemasGenerados/drone_problem_*.pddl")
     if not problem_files:
         return None
     
@@ -39,7 +39,8 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
     """Generate a PDDL problem file with the given parameters."""
     
     # Get list of files before generation
-    before_files = set(glob.glob("drone_problem_*.pddl"))
+    before_files = set(glob.glob("problemasGenerados/drone_problem_*.pddl"))
+    print(before_files)
     
     cmd = [
         "python3", "src/generate_problem.py",
@@ -48,7 +49,8 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
         "--locations", str(locations),
         "--persons", str(persons),
         "--crates", str(crates),
-        "--goals", str(goals)
+        "--goals", str(goals),
+        "--output", "problemasGenerados"
     ]
     
     print(f"Running command: {' '.join(cmd)}")
@@ -62,7 +64,7 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
         
         
         # Get list of files after generation
-        after_files = set(glob.glob("drone_problem_*.pddl"))
+        after_files = set(glob.glob("problemasGenerados/drone_problem_*.pddl"))
         
         # Find new files
         new_files = after_files - before_files
@@ -259,7 +261,7 @@ def main():
             crates=size,
             goals=size,
         )
-        
+        print(problem_file)
         if not problem_file:
             print(f"Failed to generate problem of size {size}")
             if not args.continue_on_fail:

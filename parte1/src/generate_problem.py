@@ -13,6 +13,7 @@
 from optparse import OptionParser
 import random
 import math
+import os
 import sys
 
 ########################################################################################
@@ -149,10 +150,8 @@ def setup_person_needs(options, crates_with_contents):
 ########################################################################################
 # Main program
 ########################################################################################
-
 def main():
     # Take in all arguments and print them to standard output
-
     parser = OptionParser(usage='python generator.py [-help] options...')
     parser.add_option('-d', '--drones', metavar='NUM', dest='drones', action='store', type=int, help='the number of drones')
     parser.add_option('-r', '--carriers', metavar='NUM', type=int, dest='carriers',
@@ -163,62 +162,64 @@ def main():
     parser.add_option('-c', '--crates', metavar='NUM', type=int, dest='crates', help='the number of crates available')
     parser.add_option('-g', '--goals', metavar='NUM', type=int, dest='goals',
                       help='the number of crates assigned in the goal')
-
+    # Nueva opción para especificar el path de salida
+    parser.add_option('-o', '--output', metavar='PATH', dest='output',
+                      default='.', help='El directorio en el que se generará el problema')
+    
     (options, args) = parser.parse_args()
-
+    
+    # Validaciones de opciones obligatorias
     if options.drones is None:
         print("You must specify --drones (use --help for help)")
         sys.exit(1)
-
     if options.carriers is None:
         print("You must specify --carriers (use --help for help)")
         sys.exit(1)
-
     if options.locations is None:
         print("You must specify --locations (use --help for help)")
         sys.exit(1)
-
     if options.persons is None:
         print("You must specify --persons (use --help for help)")
         sys.exit(1)
-
     if options.crates is None:
         print("You must specify --crates (use --help for help)")
         sys.exit(1)
-
     if options.goals is None:
         print("You must specify --goals (use --help for help)")
         sys.exit(1)
-
+    
     if options.goals > options.crates:
         print("Cannot have more goals than crates")
         sys.exit(1)
-
+    
     if len(content_types) > options.crates:
         print("Cannot have more content types than crates:", content_types)
         sys.exit(1)
-
+    
     if options.goals > len(content_types) * options.persons:
         print("For", options.persons, "persons, you can have at most", len(content_types) * options.persons, "goals")
         sys.exit(1)
-
+    
     print("Drones\t\t", options.drones)
     print("Carriers\t", options.carriers)
     print("Locations\t", options.locations)
     print("Persons\t\t", options.persons)
     print("Crates\t\t", options.crates)
     print("Goals\t\t", options.goals)
-
+    print("Output path:\t", options.output)
+    
+    # Asegurarse de que el directorio de salida exista
+    if not os.path.exists(options.output):
+        os.makedirs(options.output)
+        print("Directorio de salida creado:", options.output)
+    
     # Setup all lists of objects
-
-    # These lists contain the names of all Drones, locations, and so on.
-
     drone = []
     person = []
     crate = []
     carrier = []
     location = []
-
+    
     location.append("deposito")
     for x in range(options.locations):
         location.append("loc" + str(x + 1))
@@ -231,37 +232,26 @@ def main():
     for x in range(options.crates):
         crate.append("caja" + str(x + 1))
     
-    
-    # Determine the set of crates for each content.
-    # If content_types[0] is "food",
-    # then crates_with_contents[0] is a list
-    # containing the names of all crates that contain food.
+    # Determinar el set de cajas para cada contenido y otras configuraciones
     crates_with_contents = setup_content_types(options)
-
-    # Generates coordinates for each location.
-    # You will only use this indirectly,
-    # through the flight_cost() function in lab 2.
     location_coords = setup_location_coords(options)
-
-    # Determine which types of content each person needs.
-    # If person[0] is "person0",
-    # and content_types[1] is "medicine",
-    # then needs[0][1] is true iff person0 needs medicine.
     need = setup_person_needs(options, crates_with_contents)
-
+    
     # Define a problem name
     problem_name = "drone_problem_d" + str(options.drones) + "_r" + str(options.carriers) + \
                    "_l" + str(options.locations) + "_p" + str(options.persons) + "_c" + str(options.crates) + \
                    "_g" + str(options.goals) + "_ct" + str(len(content_types))
-
+    
+    # Construir la ruta completa del archivo de salida
+    output_file = os.path.join(options.output, problem_name + ".pddl")
+    
     # Open output file
-    with open(problem_name + ".pddl", 'w') as f:
+    with open(output_file, 'w') as f:
         # Write the initial part of the problem
-
         f.write("(define (problem " + problem_name + ")\n")
         f.write("(:domain dominio-drones)\n")
         f.write("(:objects\n")
-
+    
         ######################################################################
         # Write objects
         f.write("\t")
@@ -288,14 +278,13 @@ def main():
         for x in carrier:
             f.write(x + " ")
         f.write("- brazo\n")  
-
+    
         f.write(")\n")
-
+    
         ######################################################################
         # Generate an initial state
-
         f.write("(:init\n")
-
+    
         for d in drone:
             f.write("\t(dron-en " + d + " deposito)\n")
             for b in carrier:
@@ -305,11 +294,11 @@ def main():
         for c in crates_with_contents[0]:
             f.write("\t(caja-en "+c+" deposito)")
             f.write("(contiene "+c+" comida)\n")
-
+    
         for c in crates_with_contents[1]:
             f.write("\t(caja-en "+c+" deposito)")
             f.write("(contiene "+c+" medicina)\n")
-
+    
         for i, p in enumerate(need):
             f.write(f"\t(persona-en pers{i+1} loc{i+1})")
             if (p[0]):
@@ -318,26 +307,24 @@ def main():
                 f.write(f"(necesita pers{i+1} medicina)\n")
         
         f.write(")\n")
-
+    
         ######################################################################
         # Write Goals
-
         f.write("(:goal (and\n")
-
+    
         # All Drones should end up at the depot
         for d in drone:
             f.write("\t(dron-en " + d + " deposito)\n")
-
+    
         for x in range(options.persons):
             for y in range(len(content_types)):
                 if need[x][y]:
                     person_name = person[x]
                     content_name = content_types[y]
                     f.write("\t(tiene "+person_name+" "+content_name+")\n")
-
+    
         f.write("\t))\n")
         f.write(")\n")
-
 
 if __name__ == '__main__':
     main()

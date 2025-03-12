@@ -1,0 +1,24 @@
+
+; Version LPG-td-1.4
+; Seed 70591954
+; Command line: planificadores/lpg-td -o pddl/dominio-drones.pddl -f problemasGenerados/drone_problem_d1_r1_l3_p3_c3_g3_ct2.pddl -n 1 
+; Problem problemasGenerados
+; Actions having STRIPS duration
+; Time 0.04
+; Search time 0.04
+; Parsing time 0.00
+; Mutex time 0.00
+; NrActions 12
+
+0:   (COGER DRON1 CAJA2 DEPOSITO BRAZO1) [1]
+1:   (VOLAR DRON1 DEPOSITO LOC1) [1]
+2:   (ENTREGAR DRON1 CAJA2 BRAZO1 PERS1 LOC1 COMIDA) [1]
+3:   (VOLAR DRON1 LOC1 DEPOSITO) [1]
+4:   (COGER DRON1 CAJA1 DEPOSITO BRAZO1) [1]
+5:   (VOLAR DRON1 DEPOSITO LOC2) [1]
+6:   (ENTREGAR DRON1 CAJA1 BRAZO1 PERS2 LOC2 COMIDA) [1]
+7:   (VOLAR DRON1 LOC2 DEPOSITO) [1]
+8:   (COGER DRON1 CAJA3 DEPOSITO BRAZO1) [1]
+9:   (VOLAR DRON1 DEPOSITO LOC1) [1]
+10:   (ENTREGAR DRON1 CAJA3 BRAZO1 PERS1 LOC1 MEDICINA) [1]
+11:   (VOLAR DRON1 LOC1 DEPOSITO) [1]
