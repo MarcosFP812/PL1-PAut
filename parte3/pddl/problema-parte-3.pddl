@@ -64,7 +64,8 @@
       (tiene p1 comida)
       (tiene p2 medicina)
       (tiene p3 comida)
-      (tiene p4 comida)))
+      (tiene p4 comida))
+  )
 
-  (:metric minimize (total-cost))
+  (:metric minimize (fly-cost))
 )
