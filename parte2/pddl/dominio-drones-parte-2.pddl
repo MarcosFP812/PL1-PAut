@@ -13,7 +13,7 @@
     (necesita ?p - persona ?t - contenido)
     (tiene ?p - persona ?t - contenido)
     (contiene ?c - caja ?t - contenido)
-    (contenedor-libre ?k)
+    (contenedor-libre ?k - contenedor)
 
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?k - contenedor ?c - caja)

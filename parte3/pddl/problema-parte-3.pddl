@@ -51,7 +51,6 @@
     (= (fly-cost l4 l1) 21)
     (= (fly-cost l4 l2) 32)
     (= (fly-cost l4 l3) 47)
-    (= (total-cost) 0)
 
     (= (cajas-en-contenedor k1) 0)
     (= (limite-contenedor) 4)

@@ -13,7 +13,7 @@
     (necesita ?p - persona ?t - contenido)
     (tiene ?p - persona ?t - contenido)
     (contiene ?c - caja ?t - contenido)
-    (contenedor-libre ?k)
+    (contenedor-libre ?k - contenedor)
 
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?k - contenedor ?c - caja)
@@ -79,7 +79,7 @@
     :duration (= ?duration 1)
     :condition (and 
       (at start ( and (caja-en ?c ?l) 
-      (< (cajas-en-contenedor ?k) (limite-contenedor) ) ))
+      (< (cajas-en-contenedor ?k) limite-contenedor ) ))
       (over all ( and (dron-en ?d ?l) 
       (tiene-contenedor ?d ?k)))
     )
@@ -98,9 +98,9 @@
       ?to - localizacion
     )
     :duration (= ?duration (fly-cost ?from ?to))
-    :condition (and (
-      at start(and (dron-en ?d ?from)
-      (>= (combustible ?d) (fly-cost ?from ?to))))
+    :condition ( at start
+      (and (dron-en ?d ?from)
+      (>= (combustible ?d) (fly-cost ?from ?to)))
     )
     :effect (and 
       (at start(not (dron-en ?d ?from)))
@@ -113,7 +113,7 @@
       ?d - dron
       ?l - localizacion
     )
-    :duration (= ?duration (- (combustible ?d) (max-combustible)))
+    :duration (= ?duration (- (combustible ?d) max-combustible))
     :condition ( and
       (at start(< (combustible ?d) (max-combustible)))
       (over all( and (en-deposito ?l)(dron-en ?d ?l)))
