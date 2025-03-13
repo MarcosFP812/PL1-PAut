@@ -56,7 +56,7 @@
       ?d - dron 
       ?k - contenedor 
       ?l - localizacion
-      ?n1 - num
+      ?n - num
     )
     :precondition (and
       (dron-en ?d ?l)
@@ -78,7 +78,7 @@
       ?c - caja 
       ?l - localizacion
       ?k - contenedor
-      ?actual ?sig - numero
+      ?n1 ?n2 - num
     )
     :precondition (and
       (dron-en ?d ?l) 
@@ -119,6 +119,7 @@
       ?p - persona 
       ?l - localizacion 
       ?t - contenido
+      ?n1 ?n2 - num
     )
     :precondition (and
       (dron-en ?d ?l) 

@@ -25,10 +25,12 @@
     (caja-en c7 deposito) (contiene c7 comida)
     
     (cero n0)
-    (sig n0 n1)
-    (sig n1 n2)
-    (sig n2 n3)
-    (sig n3 n4)
+    (siguiente n0 n1)
+    (siguiente n1 n2)
+    (siguiente n2 n3)
+    (siguiente n3 n4)
+    
+    (cajas-en-contenedor k1 n0)
 
     (= (fly-cost l1 deposito) 30)
     (= (fly-cost l2 deposito) 20)
