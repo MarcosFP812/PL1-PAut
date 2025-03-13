@@ -1,5 +1,5 @@
 (define (domain dominio-drones-2)
-  (:requirements :strips :fluents :typing :action-costs)
+  (:requirements :strips :numeric-fluents :typing :action-costs)
 
   (:types
     dron persona localizacion caja contenido contenedor)
@@ -17,7 +17,6 @@
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?k - contenedor ?c - caja)
     (dron-libre ?d - dron)
-    (sostiene ?d - dron ?c - caja)
   )
 
   (:functions
@@ -45,6 +44,7 @@
       (tiene-contenedor ?d ?k)
       (not (dron-libre ?d))
       (not (contenedor-libre ?k))
+      (assign (cajas-en-contenedor ?k) 0)
     )
   )
 
@@ -58,7 +58,7 @@
       (dron-en ?d ?l)
       (en-deposito ?l)
       (tiene-contenedor ?d ?k)
-      (= (cajas-en-contenedor ?k) 0)
+      (<= (cajas-en-contenedor ?k) 0)
     )
     :effect (and
       (not (tiene-contenedor ?d ?k))
@@ -133,12 +133,13 @@
       (dron-en ?d ?l) 
       (persona-en ?p ?l)              
       (contiene ?c ?t)
-      (or (en-contenedor ?k ?c) (sostiene ?d ?c)) 
+      (en-contenedor ?k ?c)
     )
     :effect (and
       (tiene ?p ?t)
-      (not (contiene ?c ?t))
+      (not (necesita ?p ?t))
       (not (en-contenedor ?k ?c)) 
+      (not (contiene ?c ?t))
       (decrease (cajas-en-contenedor ?k) 1)
     )
   )
