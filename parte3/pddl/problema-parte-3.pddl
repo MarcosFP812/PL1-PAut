@@ -51,6 +51,7 @@
     (= (fly-cost l4 l1) 21)
     (= (fly-cost l4 l2) 32)
     (= (fly-cost l4 l3) 47)
+    (= (total-fly-cost) 0)
 
     (= (cajas-en-contenedor k1) 0)
     (= (limite-contenedor) 4)
@@ -66,5 +67,5 @@
       (tiene p4 comida))
   )
 
-  (:metric minimize (fly-cost))
+  (:metric minimize (total-fly-cost))
 )

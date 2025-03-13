@@ -26,6 +26,7 @@
     (fly-cost ?l1 - localizacion ?l2 - localizacion)
     (combustible ?d - dron)
     (max-combustible)
+    (total-fly-cost)
   )
 
   ;; acciones contenedor
@@ -104,7 +105,8 @@
     )
     :effect (and 
       (at start(not (dron-en ?d ?from)))
-      (at end ( and (dron-en ?d ?to)(decrease (combustible ?d) (fly-cost ?from ?to))))
+      (at end ( and (dron-en ?d ?to)(decrease (combustible ?d) (fly-cost ?from ?to)) 
+      (increase total-fly-cost (fly-cost ?from ?to))))
     )
   )
 
