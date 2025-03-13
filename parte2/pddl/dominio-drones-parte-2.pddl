@@ -24,7 +24,7 @@
     (cajas-en-contenedor ?k - contenedor)
     (limite-contenedor)
     (fly-cost ?l1 - localizacion ?l2 - localizacion)
-    (combustible ?d)
+    (combustible ?d - dron)
     (max-combustible)
     (total-cost)
   )
