@@ -1,5 +1,5 @@
 (define (problem problema-3)
-  (:domain dominio-drones-2)
+  (:domain dominio-drones-3)
   
   (:objects
     d1 - dron
