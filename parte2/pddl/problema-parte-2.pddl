@@ -7,7 +7,8 @@
     deposito l1 l2 l3 l4 - localizacion
     c1 c2 c3 c4 c5 c6 c7 - caja
     comida medicina agua - contenido
-    k1 - contenedor)
+    k1 - contenedor
+    n0 n1 n2 n3 n4 - num)
 
   (:init
     (dron-en d1 deposito)
@@ -22,7 +23,17 @@
     (caja-en c5 deposito) (contiene c5 medicina)
     (caja-en c6 deposito) (contiene c6 medicina)
     (caja-en c7 deposito) (contiene c7 comida)
+    
+    (cero n0)
+    (sig n0 n1)
+    (sig n1 n2)
+    (sig n2 n3)
+    (sig n3 n4)
 
+    (= (fly-cost l1 deposito) 30)
+    (= (fly-cost l2 deposito) 20)
+    (= (fly-cost l3 deposito) 15)
+    (= (fly-cost l4 deposito) 10)
     (= (fly-cost deposito deposito) 1 )
     (= (fly-cost deposito l1) 30)
     (= (fly-cost deposito l2) 20)
@@ -46,11 +57,6 @@
     (= (fly-cost l4 l3) 47)
     (= (fly-cost l4 l4) 1)
     (= (total-cost) 0)
-
-    (= (cajas-en-contenedor k1) 0)
-    (= (limite-contenedor k1) 4)
-    (= (combustible d1) 50)
-    (= (max-combustible) 100)
   )
 
   (:goal 

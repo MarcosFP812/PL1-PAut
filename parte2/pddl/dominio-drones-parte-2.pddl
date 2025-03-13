@@ -1,8 +1,8 @@
 (define (domain dominio-drones-2)
-  (:requirements :strips :numeric-fluents :typing :action-costs)
+  (:requirements :strips :typing :action-costs)
 
   (:types
-    dron persona localizacion caja contenido contenedor)
+    dron persona localizacion caja contenido contenedor num)
 
   (:predicates
     (dron-en ?d - dron ?l - localizacion)
@@ -17,14 +17,15 @@
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?k - contenedor ?c - caja)
     (dron-libre ?d - dron)
+    (necesita ?p - persona ?t - contenido)
+    
+    (siguiente ?n1 - num ?n2 - num)
+    (cajas-en-contenedor ?k - contenedor ?n - num)
+    (cero ?n - num)
   )
 
   (:functions
-    (cajas-en-contenedor ?k - contenedor)
-    (limite-contenedor ?k - contenedor)
     (fly-cost ?l1 - localizacion ?l2 - localizacion)
-    (combustible ?d - dron)
-    (max-combustible)
     (total-cost)
   )
 
@@ -33,18 +34,20 @@
       ?d - dron 
       ?k - contenedor 
       ?l - localizacion
+      ?n - num
     )
     :precondition (and
       (dron-en ?d ?l)
       (en-deposito ?l)
       (dron-libre ?d)
       (contenedor-libre ?k)
+      (cero ?n)
     )
     :effect (and
       (tiene-contenedor ?d ?k)
       (not (dron-libre ?d))
       (not (contenedor-libre ?k))
-      (assign (cajas-en-contenedor ?k) 0)
+      (cajas-en-contenedor ?k ?n)
     )
   )
 
@@ -53,12 +56,14 @@
       ?d - dron 
       ?k - contenedor 
       ?l - localizacion
+      ?n1 - num
     )
     :precondition (and
       (dron-en ?d ?l)
       (en-deposito ?l)
       (tiene-contenedor ?d ?k)
-      (<= (cajas-en-contenedor ?k) 0)
+      (cajas-en-contenedor ?k ?n)
+      (cero ?n)
     )
     :effect (and
       (not (tiene-contenedor ?d ?k))
@@ -73,17 +78,20 @@
       ?c - caja 
       ?l - localizacion
       ?k - contenedor
+      ?actual ?sig - numero
     )
     :precondition (and
       (dron-en ?d ?l) 
       (tiene-contenedor ?d ?k)
       (caja-en ?c ?l) 
-      (< (cajas-en-contenedor ?k) (limite-contenedor ?k))
+      (siguiente ?n1 ?n2)
+      (cajas-en-contenedor ?k ?n1)
     )
     :effect (and
       (en-contenedor ?k ?c) 
       (not (caja-en ?c ?l)) 
-      (increase (cajas-en-contenedor ?k) 1)
+      (not (cajas-en-contenedor ?k ?n1))
+      (cajas-en-contenedor ?k ?n2)
     )
   )
 
@@ -95,28 +103,11 @@
     )
     :precondition (and
       (dron-en ?d ?from)
-      (>= (combustible ?d) (fly-cost ?from ?to))
     )
     :effect (and
       (not (dron-en ?d ?from)) 
       (dron-en ?d ?to)
       (increase (total-cost) (fly-cost ?from ?to))
-      (decrease (combustible ?d) (fly-cost ?from ?to))
-    )
-  )
-
-  (:action repostar
-    :parameters (
-      ?d - dron
-      ?l - localizacion
-    )
-    :precondition (and
-      (en-deposito ?l)
-      (dron-en ?d ?l)
-      (< (combustible ?d) (max-combustible))
-    )
-    :effect (and
-      (assign (combustible ?d) (max-combustible))
     )
   )
 
@@ -134,13 +125,16 @@
       (persona-en ?p ?l)              
       (contiene ?c ?t)
       (en-contenedor ?k ?c)
+      (siguiente ?n1 ?n2)
+      (cajas-en-contenedor ?k ?n2)
     )
     :effect (and
       (tiene ?p ?t)
       (not (necesita ?p ?t))
       (not (en-contenedor ?k ?c)) 
       (not (contiene ?c ?t))
-      (decrease (cajas-en-contenedor ?k) 1)
+      (not (cajas-en-contenedor ?k ?n2))
+      (cajas-en-contenedor ?k ?n1)
     )
   )
 )
