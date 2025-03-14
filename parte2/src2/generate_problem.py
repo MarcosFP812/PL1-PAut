@@ -1,271 +1,228 @@
 #!/usr/bin/env python3
+# coding: utf-8
+
+"""
+Generador de problemas para 'dominio-drones-parte2.pddl' (Parte 2).
+Incluye:
+  - Un dron
+  - (opcional) varios contenedores
+  - localizaciones
+  - personas con necesidades
+  - cajas y contenidos
+  - cost modelado con fly-cost
+
+Se usan objetos n0..n4 para la capacidad (transportador de max 4 cajas).
+"""
+
 import random
 import math
 import os
 import sys
-from optparse import OptionParser
+import argparse
 
-########################################################################################
-# Ajustado para un dominio con transportadores numéricos y costes de acción
-# Parte 2 de la práctica de planificación.
-########################################################################################
+# Tipos de contenido manejados
+CONTENT_TYPES = ["comida", "medicina"]
 
-content_types = ["comida", "medicina"]
-
-def distance(location_coords, location_num1, location_num2):
-    x1 = location_coords[location_num1][0]
-    y1 = location_coords[location_num1][1]
-    x2 = location_coords[location_num2][0]
-    y2 = location_coords[location_num2][1]
+def distance(coords, i, j):
+    """ Distancia euclidiana entre coords[i], coords[j]. """
+    x1, y1 = coords[i]
+    x2, y2 = coords[j]
     return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-def flight_cost(location_coords, location_num1, location_num2):
-    # Coste = distancia entera + 1
-    return int(distance(location_coords, location_num1, location_num2)) + 1
-
-def setup_content_types(options):
-    # Reparto aleatorio de cuántas cajas hay de cada contenido
-    while True:
-        num_crates_with_contents = []
-        crates_left = options.crates
-        for x in range(len(content_types) - 1):
-            types_after_this = len(content_types) - x - 1
-            max_now = crates_left - types_after_this
-            num = random.randint(1, max_now)
-            num_crates_with_contents.append(num)
-            crates_left -= num
-        # Ultimo tipo se queda con lo que sobra
-        num_crates_with_contents.append(crates_left)
-
-        maxgoals = sum(min(n, options.persons) for n in num_crates_with_contents)
-        if options.goals <= maxgoals:
-            break
-
-    crates_with_contents = []
-    counter = 1
-    for x in range(len(content_types)):
-        crates = []
-        for y in range(num_crates_with_contents[x]):
-            crates.append("caja" + str(counter))
-            counter += 1
-        crates_with_contents.append(crates)
-
-    return crates_with_contents
-
-def setup_location_coords(options):
-    # La primera ubicación (0) es el "deposito"
-    location_coords = [(0, 0)]
-    for x in range(1, options.locations + 1):
-        location_coords.append((random.randint(1, 35), random.randint(1, 35)))
-    return location_coords
-
-def setup_person_needs(options, crates_with_contents):
-    need = [[False for i in range(len(content_types))] for j in range(options.persons)]
-    goals_per_contents = [0 for i in range(len(content_types))]
-
-    for _ in range(options.goals):
-        generated = False
-        while not generated:
-            rand_person = random.randint(0, options.persons - 1)
-            rand_content = random.randint(0, len(content_types) - 1)
-            if (goals_per_contents[rand_content] < len(crates_with_contents[rand_content])
-                and not need[rand_person][rand_content]):
-                need[rand_person][rand_content] = True
-                goals_per_contents[rand_content] += 1
-                generated = True
-
-    return need
+def flight_cost(coords, i, j):
+    """ Coste entero de volar entre i->j. """
+    return int(distance(coords, i, j)) + 1
 
 def main():
-    parser = OptionParser()
-    parser.add_option('-d', '--drones', type=int, dest='drones')
-    parser.add_option('-r', '--containers', type=int, dest='containers')
-    parser.add_option('-l', '--locations', type=int, dest='locations')
-    parser.add_option('-p', '--persons', type=int, dest='persons')
-    parser.add_option('-c', '--crates', type=int, dest='crates')
-    parser.add_option('-g', '--goals', type=int, dest='goals')
-    parser.add_option('-o', '--output', dest='output', default='problemasGenerados')
+    parser = argparse.ArgumentParser(description="Generador de problemas para dominio-drones-parte2")
+    parser.add_argument("--drones", type=int, default=1, help="Cantidad de drones (normalmente 1)")
+    parser.add_argument("--containers", type=int, default=1, help="Cantidad de contenedores (normalmente 1)")
+    parser.add_argument("--locations", type=int, default=5, help="Número de localizaciones extra (sin contar depósito)")
+    parser.add_argument("--persons", type=int, default=5, help="Número de personas")
+    parser.add_argument("--crates", type=int, default=5, help="Número de cajas totales")
+    parser.add_argument("--goals", type=int, default=3, help="Número de necesidades totales (suma de todos los contenidos)")
+    parser.add_argument("--output", default="problemasGenerados", help="Directorio de salida")
+    args = parser.parse_args()
 
-    (options, args) = parser.parse_args()
-
-    # Validaciones mínimas
-    if not options.drones or not options.containers or not options.locations \
-       or not options.persons or not options.crates or not options.goals:
-        print("Faltan parámetros. Usa --help para ver opciones.")
+    # Validaciones
+    if args.goals > args.crates:
+        print("No puede haber más metas que cajas.")
         sys.exit(1)
-
-    if options.goals > options.crates:
-        print("No puede haber más objetivos que cajas.")
-        sys.exit(1)
-    if len(content_types) > options.crates:
+    if len(CONTENT_TYPES) > args.crates:
         print("No puede haber más tipos de contenido que cajas.")
         sys.exit(1)
-    if options.goals > len(content_types) * options.persons:
+    if args.goals > len(CONTENT_TYPES) * args.persons:
         print("Demasiados goals para la cantidad de personas y tipos de contenido.")
         sys.exit(1)
 
-    # Mostrar info
-    print("Drones:", options.drones)
-    print("Containers:", options.containers)
-    print("Locations:", options.locations)
-    print("Persons:", options.persons)
-    print("Crates:", options.crates)
-    print("Goals:", options.goals)
-    print("Output path:", options.output)
+    # Mensajes de depuración
+    print("Drones:", args.drones)
+    print("Contenedores:", args.containers)
+    print("Locations (sin contar depósito):", args.locations)
+    print("Persons:", args.persons)
+    print("Crates:", args.crates)
+    print("Goals:", args.goals)
+    print("Output path:", args.output)
 
-    # Crear el directorio de salida si no existe
-    if not os.path.exists(options.output):
-        os.makedirs(options.output)
+    # Crear directorio si no existe
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
 
-    # Construir los nombres de objetos
-    drones = ["dron"+str(i+1) for i in range(options.drones)]
-    people = ["pers"+str(i+1) for i in range(options.persons)]
-    crates = ["caja"+str(i+1) for i in range(options.crates)]
-    containers = ["k"+str(i+1) for i in range(options.containers)]
-    locations = ["deposito"] + ["loc"+str(i+1) for i in range(options.locations)]
+    # Objetos
+    drone = [f"dron{i+1}" for i in range(args.drones)]
+    container = [f"k{i+1}" for i in range(args.containers)]
+    location = ["deposito"] + [f"loc{i+1}" for i in range(args.locations)]
+    person = [f"pers{i+1}" for i in range(args.persons)]
+    crate = [f"caja{i+1}" for i in range(args.crates)]
 
-    # Elegir cuántas cajas de cada tipo
-    crates_with_contents = setup_content_types(options)
-    # Coordenadas de cada ubicación
-    location_coords = setup_location_coords(options)
-    # Matriz de necesidades
-    need = setup_person_needs(options, crates_with_contents)
+    # Generar coordenadas: la 0 es (0,0) => depósito
+    coords = [(0,0)]
+    for _ in range(1, args.locations + 1):
+        coords.append((random.randint(0,35), random.randint(0,35)))
 
-    # Crear nombre de problema
-    problem_name = "drone_problem_d{}_l{}_p{}_c{}_g{}_ct{}".format(
-        options.drones, options.locations, options.persons,
-        options.crates, options.goals, len(content_types)
-    )
+    # Repartir contenido de las cajas
+    # Ej: crates_with_contents[0] son las cajas con "comida"
+    #     crates_with_contents[1] son las cajas con "medicina"
+    def setup_content_types(crates_total, persons, goals):
+        """ Asignar aleatoriamente cuántas cajas de cada contenido. """
+        while True:
+            num_left = crates_total
+            amounts = []
+            for i in range(len(CONTENT_TYPES)-1):
+                max_now = num_left - (len(CONTENT_TYPES)-(i+1))
+                r = random.randint(1, max_now)
+                amounts.append(r)
+                num_left -= r
+            # Ultimo tipo
+            amounts.append(num_left)
 
-    output_file = os.path.join(options.output, problem_name + ".pddl")
-    with open(output_file, "w") as f:
-        f.write("(define (problem {})\n".format(problem_name))
+            # Chequear si con ese reparto se puede cumplir #goals
+            # en <= persons
+            max_goals = sum(min(cnt, persons) for cnt in amounts)
+            if goals <= max_goals:
+                return amounts
+
+    amounts = setup_content_types(args.crates, args.persons, args.goals)
+    crates_with_contents = []
+    cindex = 0
+    for i, amt in enumerate(amounts):
+        subset = []
+        for _ in range(amt):
+            cindex += 1
+            subset.append(f"caja{cindex}")
+        crates_with_contents.append(subset)
+
+    # Necesidades de personas
+    # need[pers_i][content_j] => bool
+    need = [[False]*len(CONTENT_TYPES) for _ in range(args.persons)]
+    goals_per_type = [0]*len(CONTENT_TYPES)
+    for _ in range(args.goals):
+        while True:
+            rp = random.randint(0, args.persons-1)
+            rc = random.randint(0, len(CONTENT_TYPES)-1)
+            # Si aún hay cajas de ese type (goals_per_type[rc] < len(subset))
+            if goals_per_type[rc] < len(crates_with_contents[rc]) and not need[rp][rc]:
+                need[rp][rc] = True
+                goals_per_type[rc] += 1
+                break
+
+    # Nombre del problema
+    problem_name = f"drone_problem_d{args.drones}_l{args.locations}_p{args.persons}_c{args.crates}_g{args.goals}_ct{len(CONTENT_TYPES)}"
+    out_file = os.path.join(args.output, problem_name+".pddl")
+
+    with open(out_file, "w") as f:
+        # Encabezado
+        f.write(f"(define (problem {problem_name})\n")
         f.write("(:domain dominio-drones-parte2)\n\n")
 
-        # ------------------------------------------------------
         # Objetos
-        # ------------------------------------------------------
         f.write("(:objects\n")
-
-        f.write("  ")  # drones
-        for d in drones:
-            f.write("{} ".format(d))
-        f.write("- dron\n")
-
-        f.write("  ")  # locations
-        for loc in locations:
-            f.write("{} ".format(loc))
-        f.write("- localizacion\n")
-
-        f.write("  ")  # crates
-        for c in crates:
-            f.write("{} ".format(c))
-        f.write("- caja\n")
-
-        f.write("  ")  # contenido
-        for ct in content_types:
-            f.write("{} ".format(ct))
-        f.write("- contenido\n")
-
-        f.write("  ")  # personas
-        for pp in people:
-            f.write("{} ".format(pp))
-        f.write("- persona\n")
-
-        f.write("  ")  # contenedores
-        for k in containers:
-            f.write("{} ".format(k))
-        f.write("- contenedor\n")
-
-        # Numeros para capacidad 0..4
+        # drone
+        f.write("  " + " ".join(drone) + " - dron\n")
+        # container
+        f.write("  " + " ".join(container) + " - contenedor\n")
+        # location
+        f.write("  " + " ".join(location) + " - localizacion\n")
+        # crate
+        f.write("  " + " ".join(crate) + " - caja\n")
+        # content
+        f.write("  " + " ".join(CONTENT_TYPES) + " - contenido\n")
+        # person
+        f.write("  " + " ".join(person) + " - persona\n")
+        # num => n0..n4
         f.write("  n0 n1 n2 n3 n4 - num\n")
-
         f.write(")\n\n")
 
-        # ------------------------------------------------------
         # Init
-        # ------------------------------------------------------
         f.write("(:init\n")
+        # Dron en deposito
+        for d in drone:
+            f.write(f"  (dron-en {d} deposito)\n")
+            f.write(f"  (dron-libre {d})\n")
+            f.write(f"  (dron-sin-caja {d})\n\n")
 
-        # 1) Estados iniciales del dron
-        for d in drones:
-            f.write("  (dron-en {} deposito)\n".format(d))
-            f.write("  (dron-libre {})\n".format(d))
-            f.write("  (dron-sin-caja {})\n".format(d))
-            f.write("\n")
+        # Contenedores en depósito, libres
+        for k in container:
+            f.write(f"  (contenedor-en {k} deposito)\n")
+            f.write(f"  (contenedor-libre {k})\n")
+            # Capacidad inicial = n0 => 0
+            f.write(f"  (cajas-en-contenedor {k} n0)\n\n")
 
-        # 2) Contenedores en el depósito y vacíos (cajas-en-contenedor k n0)
-        for k in containers:
-            f.write("  (contenedor-en {} deposito)\n".format(k))
-            f.write("  (contenedor-libre {})\n".format(k))
-            f.write("  (cajas-en-contenedor {} n0)\n".format(k))
-
-        # 3) Cajas en el depósito, libres
+        # Cajas en depósito
         for i, group in enumerate(crates_with_contents):
+            cont_type = CONTENT_TYPES[i]
             for c in group:
-                f.write("  (caja-en {} deposito)\n".format(c))
-                f.write("  (caja-libre {})\n".format(c))
-                f.write("  (contiene {} {})\n".format(c, content_types[i]))
+                f.write(f"  (caja-en {c} deposito)\n")
+                f.write(f"  (caja-libre {c})\n")
+                f.write(f"  (contiene {c} {cont_type})\n")
             f.write("\n")
 
-        # 4) Personas y necesidades
-        #   Asignamos persona-en persX locX+1 (salvo que quieras aleatorio)
-        #   y (necesita persX contenido) según la matriz need
-        for i, p in enumerate(people):
-            # Para simplicidad, que cada persona esté en loc i+1 (si i < #locations)
-            # Si tienes más personas que localizaciones, tendrás que hacer algo más aleatorio
-            loc_index = (i % (options.locations)) + 1
-            f.write("  (persona-en {} loc{})\n".format(p, loc_index))
-
-            for cont_i, needed in enumerate(need[i]):
+        # Personas, en loc i+1 (mod if out of range)
+        for i, p in enumerate(person):
+            loc_index = (i % args.locations) + 1
+            locname = f"loc{loc_index}"
+            f.write(f"  (persona-en {p} {locname})\n")
+            for ct_i, needed in enumerate(need[i]):
                 if needed:
-                    f.write("  (necesita {} {})\n".format(p, content_types[cont_i]))
+                    f.write(f"  (necesita {p} {CONTENT_TYPES[ct_i]})\n")
             f.write("\n")
 
-        # 5) Definir los costes de vuelo (fly-cost locA locB)
-        for i in range(len(location_coords)):
-            for j in range(len(location_coords)):
+        # Distancias => (fly-cost loc_i loc_j)
+        for i in range(len(coords)):
+            for j in range(len(coords)):
                 if i != j:
-                    cost_value = flight_cost(location_coords, i, j)
-                    loc_i = locations[i]
-                    loc_j = locations[j]
-                    f.write("  (= (fly-cost {} {}) {})\n".format(loc_i, loc_j, cost_value))
+                    costval = flight_cost(coords, i, j)
+                    f.write(f"  (= (fly-cost {location[i]} {location[j]}) {costval})\n")
 
-        # 6) Relación siguiente para n0->n1->n2->n3->n4
+        # Relación siguiente n0->n1->n2->n3->n4
         f.write("\n  (cero n0)\n")
         f.write("  (siguiente n0 n1)\n")
         f.write("  (siguiente n1 n2)\n")
         f.write("  (siguiente n2 n3)\n")
         f.write("  (siguiente n3 n4)\n")
 
-        # 7) Iniciar total-cost a 0
+        # total-cost = 0
         f.write("  (= (total-cost) 0)\n")
 
         f.write(")\n\n")
 
-        # ------------------------------------------------------
         # Goal
-        # ------------------------------------------------------
         f.write("(:goal (and\n")
-        # a) dron(es) de vuelta al deposito (opcional)
-        for d in drones:
-            f.write("  (dron-en {} deposito)\n".format(d))
-
-        # b) cada persona tenga lo que necesita
-        for i, p in enumerate(people):
-            for cont_i, needed in enumerate(need[i]):
+        # dron en deposito al final (opcional)
+        for d in drone:
+            f.write(f"  (dron-en {d} deposito)\n")
+        # que cada persona reciba lo que necesita
+        for i, p in enumerate(person):
+            for ct_i, needed in enumerate(need[i]):
                 if needed:
-                    f.write("  (tiene {} {})\n".format(p, content_types[cont_i]))
+                    f.write(f"  (tiene {p} {CONTENT_TYPES[ct_i]})\n")
         f.write("))\n\n")
 
-        # ------------------------------------------------------
-        # Métrica: minimizar coste total
-        # ------------------------------------------------------
+        # Minimizar
         f.write("(:metric minimize (total-cost))\n")
+        f.write(")\n")
 
-        f.write(")\n")  # Cierre define problem
-
-    print("Problema generado en:", output_file)
+    print(f"Problema generado en: {out_file}")
 
 
 if __name__ == "__main__":

@@ -1,150 +1,135 @@
-(define (domain dominio-drones-parte2-funciones)
-  (:requirements
-    :strips 
-    :typing 
-    :negative-preconditions 
-    :numeric-fluents
-    :action-costs
+(define (domain dominio-drones-parte2)
+  (:requirements :strips :typing :action-costs :fluents)
+  ;; Quitamos :negative-preconditions para no permitir precondiciones "not(...)".
+  ;; :fluents sirve para manejar el (total-cost) y (fly-cost).
+
+  (:types
+    dron persona caja contenedor localizacion contenido num
   )
-  (:types dron localizacion caja contenido persona contenedor)
 
+  ;; -----------------------------------------
+  ;; PREDICADOS
+  ;; -----------------------------------------
   (:predicates
-    (dron-en ?d - dron ?loc - localizacion)
-    (persona-en ?p - persona ?loc - localizacion)
-    (caja-en ?c - caja ?loc - localizacion)
-
-    (contiene ?c - caja ?x - contenido)
-
-    (necesita ?p - persona ?x - contenido)
-    (tiene ?p - persona ?x - contenido)
-
+    ;; DRON
+    (dron-en ?d - dron ?l - localizacion)
     (dron-libre ?d - dron)
     (dron-sin-caja ?d - dron)
+
+    ;; CONTENEDORES
+    (contenedor-en ?k - contenedor ?l - localizacion)
+    (contenedor-libre ?k - contenedor)
+    (cajas-en-contenedor ?k - contenedor ?n - num)
+
+    ;; CAJAS
+    (caja-en ?c - caja ?l - localizacion)
     (caja-libre ?c - caja)
+    (contiene ?c - caja ?t - contenido)
+    (caja-en-contenedor ?c - caja ?k - contenedor)
 
-    (contenedor-en ?k - contenedor ?loc - localizacion)
-    ;; Podrías tener algún predicado más si quieres, ej. (contenedor-libre ?k) etc.
+    ;; PERSONAS
+    (persona-en ?p - persona ?l - localizacion)
+    (necesita ?p - persona ?t - contenido)
+    (tiene ?p - persona ?t - contenido)
+
+    ;; NÚMEROS discretos para la capacidad
+    (cero ?n - num)
+    (siguiente ?n1 - num ?n2 - num)
   )
 
+  ;; -----------------------------------------
+  ;; FUNCIONES (fluents)
+  ;; -----------------------------------------
   (:functions
-    ;; Capacidad máxima del contenedor: se asigna con (= (capacity k1) 4) en :init
-    (capacity ?k - contenedor) - number
-    ;; Cuántas cajas están actualmente en el contenedor
-    (used ?k - contenedor) - number
-
-    (fly-cost ?from - localizacion ?to - localizacion) - number
-    (total-cost) - number
+    (total-cost) ;; Para la métrica
+    (fly-cost ?l1 - localizacion ?l2 - localizacion)
   )
 
-  ;;-------------------------
+  ;; -----------------------------------------
   ;; ACCIONES
-  ;;-------------------------
+  ;; -----------------------------------------
 
-  ;; (1) COGER-CAJA (igual que antes)
-  (:action coger-caja
-    :parameters (?d - dron ?c - caja ?loc - localizacion)
-    :precondition (and
-      (dron-en ?d ?loc)
-      (caja-en ?c ?loc)
-      (dron-libre ?d)
-      (dron-sin-caja ?d)
-      (caja-libre ?c)
-    )
-    :effect (and
-      (not (caja-libre ?c))
-      (not (dron-sin-caja ?d))
-      (increase (total-cost) 1)
-    )
-  )
-
-  ;; (2) DEJAR-CAJA
-  (:action dejar-caja
-    :parameters (?d - dron ?c - caja ?loc - localizacion)
-    :precondition (and
-      (dron-en ?d ?loc)
-      (not (dron-sin-caja ?d)) 
-      (not (caja-libre ?c))
-    )
-    :effect (and
-      (caja-libre ?c)
-      (dron-sin-caja ?d)
-      (increase (total-cost) 1)
-    )
-  )
-
-  ;; (3) METER-CAJA-EN-CONTENEDOR usando funciones 'used' y 'capacity'
+  ;; 1) meter-caja-en-contenedor
   (:action meter-caja-en-contenedor
-    :parameters (?d - dron ?c - caja ?k - contenedor ?loc - localizacion)
+    :parameters (?d - dron ?c - caja ?k - contenedor ?l - localizacion ?n - num ?n2 - num)
     :precondition (and
-      (dron-en ?d ?loc)
-      (contenedor-en ?k ?loc)
-      (not (dron-sin-caja ?d))
-      (not (caja-libre ?c))
-      ;; chequea que no supere la capacidad
-      (< (used ?k) (capacity ?k))
-    )
-    :effect (and
-      ;; dron suelta caja en contenedor
-      (not (dron-sin-caja ?d))
-      (dron-sin-caja ?d)
-      (caja-libre ?c)
-      ;; incrementa la ocupación
-      (increase (used ?k) 1)
-      (increase (total-cost) 1)
-    )
-  )
-
-  ;; (4) SACAR-CAJA-DE-CONTENEDOR
-  (:action sacar-caja-de-contenedor
-    :parameters (?d - dron ?c - caja ?k - contenedor ?loc - localizacion)
-    :precondition (and
-      (dron-en ?d ?loc)
-      (contenedor-en ?k ?loc)
+      (dron-en ?d ?l)
       (dron-libre ?d)
-      (dron-sin-caja ?d)
-      ;; Para poder sacar, used(k) > 0
-      (> (used ?k) 0)
-    )
-    :effect (and
-      (not (dron-libre ?d))
-      (not (dron-sin-caja ?d))
-      (not (caja-libre ?c))
-      (decrease (used ?k) 1)
-      (increase (total-cost) 1)
-    )
-  )
-
-  ;; (5) ENTREGAR-CAJA
-  (:action entregar-caja
-    :parameters (?d - dron ?c - caja ?p - persona ?x - contenido ?loc - localizacion)
-    :precondition (and
-      (dron-en ?d ?loc)
-      (persona-en ?p ?loc)
-      (contiene ?c ?x)
-      (necesita ?p ?x)
-      (not (dron-sin-caja ?d))
-      (not (caja-libre ?c))
-    )
-    :effect (and
-      (tiene ?p ?x)
-      (not (necesita ?p ?x))
       (caja-libre ?c)
-      (dron-sin-caja ?d)
+      (caja-en ?c ?l)
+      (contenedor-en ?k ?l)
+      (cajas-en-contenedor ?k ?n)
+      (siguiente ?n ?n2)
+    )
+    :effect (and
+      ;; Efectos de borrado (no son precondiciones negativas)
+      (not (caja-en ?c ?l))
+      (not (caja-libre ?c))
+      (not (cajas-en-contenedor ?k ?n))
+      ;; Efectos de adición
+      (caja-en-contenedor ?c ?k)
+      (cajas-en-contenedor ?k ?n2)
       (increase (total-cost) 1)
     )
   )
 
-  ;; (6) VOLAR
-  (:action volar
-    :parameters (?d - dron ?from ?to - localizacion)
+  ;; 2) sacar-caja-del-contenedor
+  (:action sacar-caja-del-contenedor
+    :parameters (?d - dron ?c - caja ?k - contenedor ?l - localizacion ?n - num ?n2 - num)
     :precondition (and
-      (dron-en ?d ?from)
-      (not (= ?from ?to))
+      (dron-en ?d ?l)
+      (dron-libre ?d)
+      (caja-en-contenedor ?c ?k)
+      (contenedor-en ?k ?l)
+      (siguiente ?n2 ?n)
+      (cajas-en-contenedor ?k ?n)
     )
     :effect (and
-      (not (dron-en ?d ?from))
-      (dron-en ?d ?to)
-      (increase (total-cost) (fly-cost ?from ?to))
+      (not (caja-en-contenedor ?c ?k))
+      (not (cajas-en-contenedor ?k ?n))
+      (caja-en ?c ?l)
+      (caja-libre ?c)
+      (cajas-en-contenedor ?k ?n2)
+      (increase (total-cost) 1)
     )
   )
+
+  ;; 3) volar-dron (mover dron y contenedor)
+  (:action volar-dron
+    :parameters (?d - dron ?k - contenedor ?origen - localizacion ?destino - localizacion)
+    :precondition (and
+      (dron-en ?d ?origen)
+      (contenedor-en ?k ?origen)
+    )
+    :effect (and
+      (not (dron-en ?d ?origen))
+      (not (contenedor-en ?k ?origen))
+      (dron-en ?d ?destino)
+      (contenedor-en ?k ?destino)
+      (increase (total-cost) (fly-cost ?origen ?destino))
+    )
+  )
+
+  ;; 4) entregar-caja
+  (:action entregar-caja
+    :parameters (?d - dron ?c - caja ?p - persona ?l - localizacion ?t - contenido)
+    :precondition (and
+      (dron-en ?d ?l)
+      (caja-en ?c ?l)
+      (caja-libre ?c)
+      (persona-en ?p ?l)
+      (contiene ?c ?t)
+      (necesita ?p ?t)
+    )
+    :effect (and
+      (tiene ?p ?t)
+      (not (necesita ?p ?t))
+      (increase (total-cost) 1)
+    )
+  )
+
+  ;; -----------------------------------------
+  ;; MÉTRICA
+  ;; -----------------------------------------
+  (:metric minimize (total-cost))
 )
