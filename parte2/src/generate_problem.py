@@ -277,6 +277,8 @@ def main():
         for x in containers:
             f.write(x + " ")
         f.write("- contenedor\n")  
+
+        f.write("n0 n1 n2 n3 n4 - num\n")  
     
         f.write(")\n")
     
@@ -287,6 +289,7 @@ def main():
         for d in drone:
             f.write("\t(dron-en " + d + " deposito)\n")
             f.write("\t(dron-libre " + d + ")\n")
+            f.write("\t(dron-sin-caja " + d + ")\n")
             f.write("\n")
 
         f.write("\t(en-deposito deposito) \n")
@@ -296,10 +299,12 @@ def main():
         
         for c in crates_with_contents[0]:
             f.write("\t(caja-en "+c+" deposito) ")
+            f.write("caja-libre "+c+")")
             f.write("(contiene "+c+" comida)\n")
     
         for c in crates_with_contents[1]:
             f.write("\t(caja-en "+c+" deposito)")
+            f.write("caja-libre "+c+")")
             f.write("(contiene "+c+" medicina)\n")
     
         for i, p in enumerate(need):
@@ -318,15 +323,10 @@ def main():
                     f.write(f"\t(= (fly-cost {loc_i} {loc_j}) {cost})\n")
 
         for c in containers:
-            f.write("\t(= (cajas-en-contenedor " + c + ") 0)\n")
+            f.write("\t(= (cajas-en-contenedor " + c + " n0)\n")
 
-        f.write("\t(= (limite-contenedor) 4)\n")
+        f.write("(cero n0) (siguiente n0 n1) (siguiente n1 n2) (siguiente n2 n3) (siguiente n3 n4)")
         f.write("\t(= (total-cost) 0)\n")
-
-        for d in drone:
-            f.write("\t(= (combustible " + d + ") 50)\n")
-
-        f.write("\t(= (max-combustible) 100)\n")
     
         f.write(")\n")
     
