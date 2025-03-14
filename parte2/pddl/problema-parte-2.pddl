@@ -11,6 +11,12 @@
     n0 n1 n2 n3 n4 - num)
 
   (:init
+    (cero n0)
+    (siguiente n0 n1)
+    (siguiente n1 n2)
+    (siguiente n2 n3)
+    (siguiente n3 n4)
+    
     (dron-en d1 deposito)
     (dron-libre d1)
     (en-deposito deposito)
@@ -24,19 +30,31 @@
     (caja-en c6 deposito) (contiene c6 medicina)
     (caja-en c7 deposito) (contiene c7 comida)
     
-    (cero n0)
-    (siguiente n0 n1)
-    (siguiente n1 n2)
-    (siguiente n2 n3)
-    (siguiente n3 n4)
+    (necesita p1 comida)
+    (necesita p2 medicina)
+    (necesita p3 comida)
+    (necesita p4 comida)
     
     (cajas-en-contenedor k1 n0)
+    
+    (= (fly-cost deposito deposito) 0)
+    (= (fly-cost loc1 loc1) 0)
+    (= (fly-cost loc2 loc2) 0)
+    (= (fly-cost loc3 loc3) 0)
+    (= (fly-cost loc4 loc4) 0)
+    (= (fly-cost loc5 loc5) 0)
+    (= (fly-cost loc6 loc6) 0)
+    (= (fly-cost loc7 loc7) 0)
+    (= (fly-cost loc8 loc8) 0)
+    (= (fly-cost loc9 loc9) 0)
+    (= (fly-cost loc10 loc10) 0)
+    (= (fly-cost loc11 loc11) 0)
+
 
     (= (fly-cost l1 deposito) 30)
     (= (fly-cost l2 deposito) 20)
     (= (fly-cost l3 deposito) 15)
     (= (fly-cost l4 deposito) 10)
-    (= (fly-cost deposito deposito) 1 )
     (= (fly-cost deposito l1) 30)
     (= (fly-cost deposito l2) 20)
     (= (fly-cost deposito l3) 15)
@@ -63,6 +81,7 @@
 
   (:goal 
     (and
+      (dron-en d1 deposito)
       (tiene p1 comida)
       (tiene p2 medicina)
       (tiene p3 comida)

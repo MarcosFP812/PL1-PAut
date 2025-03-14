@@ -13,11 +13,12 @@
     (tiene ?p - persona ?t - contenido)
     (contiene ?c - caja ?t - contenido)
     (contenedor-libre ?k - contenedor) 
+    
+    (necesita ?p - persona ?t - contenido)
 
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?k - contenedor ?c - caja)
     (dron-libre ?d - dron)
-    (necesita ?p - persona ?t - contenido)
     
     (siguiente ?n1 - num ?n2 - num)
     (cajas-en-contenedor ?k - contenedor ?n - num)
@@ -62,8 +63,8 @@
       (dron-en ?d ?l)
       (en-deposito ?l)
       (tiene-contenedor ?d ?k)
-      (cajas-en-contenedor ?k ?n)
       (cero ?n)
+      (cajas-en-contenedor ?k ?n)
     )
     :effect (and
       (not (tiene-contenedor ?d ?k))
@@ -123,9 +124,13 @@
     )
     :precondition (and
       (dron-en ?d ?l) 
+      (tiene-contenedor ?d ?k)
+      (en-contenedor ?k ?c)
+      
       (persona-en ?p ?l)              
       (contiene ?c ?t)
-      (en-contenedor ?k ?c)
+      (necesita ?p ?t)
+      
       (siguiente ?n1 ?n2)
       (cajas-en-contenedor ?k ?n2)
     )
