@@ -40,7 +40,7 @@ def generate_problem(drones, carriers, locations, persons, crates, goals):
     before_files = set(glob.glob("problemasGenerados/drone_problem_*.pddl"))
     
     cmd = [
-        "python3", "generate_problem.py",
+        "python3", "src2/generate_problem.py",
         "--drones", str(drones),
         "--containers", str(carriers),
         "--locations", str(locations),
