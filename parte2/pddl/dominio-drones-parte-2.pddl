@@ -82,7 +82,6 @@
       ?d - dron 
       ?c - caja 
       ?l - localizacion
-      ?n - num
     )
     :precondition (and
       (dron-en ?d ?l)
@@ -94,6 +93,7 @@
       (tiene-caja ?d ?c)
       (not (dron-sin-caja ?d))
       (not (caja-libre ?c))
+      (not (caja-en ?c ?l))
     )
   )
 
@@ -131,6 +131,7 @@
       (tiene-contenedor ?d ?k)
       (en-contenedor ?k ?c)
       (dron-sin-caja ?d)
+      (siguiente ?n1 ?n2)
     )
     :effect (and
       (not (en-contenedor ?k ?c)) 
@@ -165,7 +166,6 @@
       ?p - persona 
       ?l - localizacion 
       ?t - contenido
-      ?n1 ?n2 - num
     )
     :precondition (and
       (dron-en ?d ?l) 
@@ -179,7 +179,6 @@
     :effect (and
       (tiene ?p ?t)
       (not (necesita ?p ?t))
-      (not (contiene ?c ?t))
       (not (tiene-caja ?d ?c))
       (dron-sin-caja ?d)
     )
