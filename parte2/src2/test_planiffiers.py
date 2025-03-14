@@ -144,20 +144,27 @@ def run_planner(domain_file, problem_file, planner_alias, time_limit_seconds=60)
         output = result.stdout
         plan_length = None
         
-        # Si es FF-like: "found legal plan as follows\n...\nlength: 10"
+        # A) Fast Downward suele imprimir "Plan length: 10 step(s)."
+        pl_match = re.search(r"Plan length:\s*(\d+)", combined_output)
+        if pl_match:
+            plan_length = int(pl_match.group(1))
+            print(f"Plan length: {plan_length}")
+            return plan_length, execution_time, plan_cost
+        
+        # B) Si es FF-like: "found legal plan as follows\n...\nlength: 10"
         plan_match = re.search(r"found legal plan.+\n.+length: (\d+)", output, re.DOTALL)
         if plan_match:
             plan_length = int(plan_match.group(1))
             print(f"Plan length: {plan_length}")
             return plan_length, execution_time, plan_cost
         
-        # Para planes que muestran steps (ej: "step 0: ... step 1: ...")
+        # C) Buscar "step 0: ... step 1: ..." en la salida
         step_count = len(re.findall(r"step\s+\d+:", output))
         if step_count > 0:
             print(f"Plan con {step_count} pasos.")
             return step_count, execution_time, plan_cost
         
-        # En caso de no encontrar la longitud, devolvemos 0 con un plan cost
+        # D) Si nada anterior funcionó, devolvemos 0 con un plan cost
         print("Éxito, pero no encontré la longitud del plan, se asume 0.")
         return 0, execution_time, plan_cost
     
