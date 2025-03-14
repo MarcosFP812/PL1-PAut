@@ -20,6 +20,10 @@
     (en-contenedor ?k - contenedor ?c - caja)
     (dron-libre ?d - dron)
     
+    (tiene-caja ?d - dron ?c - caja)
+    (caja-libre ?c - caja)
+    (dron-sin-caja ?d - dron)
+  
     (siguiente ?n1 - num ?n2 - num)
     (cajas-en-contenedor ?k - contenedor ?n - num)
     (cero ?n - num)
@@ -51,7 +55,7 @@
       (cajas-en-contenedor ?k ?n)
     )
   )
-
+  
   (:action dejar
     :parameters (
       ?d - dron 
@@ -72,27 +76,68 @@
       (contenedor-libre ?k)
     )
   )
+  
+  (:action coger-caja
+    :parameters (
+      ?d - dron 
+      ?c - caja 
+      ?l - localizacion
+      ?n - num
+    )
+    :precondition (and
+      (dron-en ?d ?l)
+      (caja-en ?c ?l)
+      (dron-sin-caja ?d)
+      (caja-libre ?c)
+    )
+    :effect (and
+      (tiene-caja ?d ?c)
+      (not (dron-sin-caja ?d))
+      (not (caja-libre ?c))
+    )
+  )
+
 
   (:action meter
     :parameters (
       ?d - dron 
       ?c - caja 
-      ?l - localizacion
       ?k - contenedor
       ?n1 ?n2 - num
     )
-    :precondition (and
-      (dron-en ?d ?l) 
+    :precondition (and 
       (tiene-contenedor ?d ?k)
-      (caja-en ?c ?l) 
+      (tiene-caja ?d ?c) 
       (siguiente ?n1 ?n2)
       (cajas-en-contenedor ?k ?n1)
     )
     :effect (and
       (en-contenedor ?k ?c) 
-      (not (caja-en ?c ?l)) 
+      (not (tiene-caja ?d ?c))
+      (dron-sin-caja ?d) 
       (not (cajas-en-contenedor ?k ?n1))
       (cajas-en-contenedor ?k ?n2)
+    )
+  )
+  
+  (:action sacar
+    :parameters (
+      ?d - dron 
+      ?c - caja 
+      ?k - contenedor
+      ?n1 ?n2 - num
+    )
+    :precondition (and
+      (tiene-contenedor ?d ?k)
+      (en-contenedor ?k ?c)
+      (dron-sin-caja ?d)
+    )
+    :effect (and
+      (not (en-contenedor ?k ?c)) 
+      (not (cajas-en-contenedor ?k ?n2))
+      (cajas-en-contenedor ?k ?n1)
+      (not (dron-sin-caja ?d))
+      (tiene-caja ?d ?c)
     )
   )
 
@@ -104,6 +149,7 @@
     )
     :precondition (and
       (dron-en ?d ?from)
+      (dron-sin-caja ?d)
     )
     :effect (and
       (not (dron-en ?d ?from)) 
@@ -116,7 +162,6 @@
     :parameters (
       ?d - dron 
       ?c - caja 
-      ?k - contenedor
       ?p - persona 
       ?l - localizacion 
       ?t - contenido
@@ -124,23 +169,19 @@
     )
     :precondition (and
       (dron-en ?d ?l) 
-      (tiene-contenedor ?d ?k)
-      (en-contenedor ?k ?c)
+      (tiene-caja ?d ?c)
       
       (persona-en ?p ?l)              
       (contiene ?c ?t)
       (necesita ?p ?t)
       
-      (siguiente ?n1 ?n2)
-      (cajas-en-contenedor ?k ?n2)
     )
     :effect (and
       (tiene ?p ?t)
       (not (necesita ?p ?t))
-      (not (en-contenedor ?k ?c)) 
       (not (contiene ?c ?t))
-      (not (cajas-en-contenedor ?k ?n2))
-      (cajas-en-contenedor ?k ?n1)
+      (not (tiene-caja ?d ?c))
+      (dron-sin-caja ?d)
     )
   )
 )

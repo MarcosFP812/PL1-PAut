@@ -30,25 +30,31 @@
     (caja-en c6 deposito) (contiene c6 medicina)
     (caja-en c7 deposito) (contiene c7 comida)
     
+    (persona-en p1 l1)
+    (persona-en p2 l2)
+    (persona-en p3 l3)
+    (persona-en p4 l4)
+    
     (necesita p1 comida)
     (necesita p2 medicina)
     (necesita p3 comida)
     (necesita p4 comida)
     
     (cajas-en-contenedor k1 n0)
+    (caja-libre c1)
+    (caja-libre c2)
+    (caja-libre c3)
+    (caja-libre c4)
+    (caja-libre c5)
+    (caja-libre c6)
+    (caja-libre c7)
     
     (= (fly-cost deposito deposito) 0)
-    (= (fly-cost loc1 loc1) 0)
-    (= (fly-cost loc2 loc2) 0)
-    (= (fly-cost loc3 loc3) 0)
-    (= (fly-cost loc4 loc4) 0)
-    (= (fly-cost loc5 loc5) 0)
-    (= (fly-cost loc6 loc6) 0)
-    (= (fly-cost loc7 loc7) 0)
-    (= (fly-cost loc8 loc8) 0)
-    (= (fly-cost loc9 loc9) 0)
-    (= (fly-cost loc10 loc10) 0)
-    (= (fly-cost loc11 loc11) 0)
+    (= (fly-cost l1 l1) 0)
+    (= (fly-cost l2 l2) 0)
+    (= (fly-cost l3 l3) 0)
+    (= (fly-cost l4 l4) 0)
+
 
 
     (= (fly-cost l1 deposito) 30)
