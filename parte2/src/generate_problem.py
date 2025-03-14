@@ -291,28 +291,31 @@ def main():
             f.write("\t(dron-libre " + d + ")\n")
             f.write("\t(dron-sin-caja " + d + ")\n")
             f.write("\n")
-
         f.write("\t(en-deposito deposito) \n")
 
         for c in containers:
             f.write("\t(contenedor-libre " + c + ")\n")
-        
+        f.write(f"\n")
         for c in crates_with_contents[0]:
             f.write("\t(caja-en "+c+" deposito) ")
-            f.write("caja-libre "+c+")")
+            f.write("(caja-libre "+c+")")
             f.write("(contiene "+c+" comida)\n")
-    
+        f.write(f"\n")
         for c in crates_with_contents[1]:
             f.write("\t(caja-en "+c+" deposito)")
-            f.write("caja-libre "+c+")")
+            f.write("(caja-libre "+c+")")
             f.write("(contiene "+c+" medicina)\n")
-    
+        f.write(f"\n")
         for i, p in enumerate(need):
             f.write(f"\t(persona-en pers{i+1} loc{i+1})")
             if (p[0]):
                 f.write(f"(necesita pers{i+1} comida)\n")
             if (p[1]):
                 f.write(f"(necesita pers{i+1} medicina)\n")
+            if (not (p[0] or p[1])):
+                f.write(f"\n")
+        
+        f.write(f"\n")
         
         for i in range(len(location_coords)):
             for j in range(len(location_coords)):
@@ -321,11 +324,11 @@ def main():
                     loc_j = "deposito" if j == 0 else "loc" + str(j)
                     cost = flight_cost(location_coords, i, j)
                     f.write(f"\t(= (fly-cost {loc_i} {loc_j}) {cost})\n")
-
+        f.write(f"\n")
         for c in containers:
-            f.write("\t(= (cajas-en-contenedor " + c + " n0)\n")
-
-        f.write("(cero n0) (siguiente n0 n1) (siguiente n1 n2) (siguiente n2 n3) (siguiente n3 n4)")
+            f.write("\t(cajas-en-contenedor " + c + " n0)\n")
+        f.write(f"\n")
+        f.write("\t(cero n0) \n\t(siguiente n0 n1) \n\t(siguiente n1 n2) \n\t(siguiente n2 n3) \n\t(siguiente n3 n4)")
         f.write("\t(= (total-cost) 0)\n")
     
         f.write(")\n")
