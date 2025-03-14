@@ -86,25 +86,20 @@ def run_planner(domain_file, problem_file, planner_path, time_limit_seconds=60):
     # Make sure files exist
     if not os.path.exists(domain_file):
         print(f"Domain file does not exist: {domain_file}")
-        return None, 0
+        return None, 0, None
     if not os.path.exists(problem_file):
         print(f"Problem file does not exist: {problem_file}")
-        return None, 0
-    if not os.path.exists(planner_path):
-        print(f"Planner does not exist: {planner_path}")
-        return None, 0
-    
-    # Make sure the planner is executable
-    if not os.access(planner_path, os.X_OK):
-        print(f"Planner file is not executable: {planner_path}")
-        os.chmod(planner_path, 0o755)  # Try to make it executable
-        print("Tried to make the planner executable")
+        return None, 0, None
+
     
     # FF planner command
-    if planner_path == "planificadores/lpg-td":
-        cmd = [planner_path, "-o", domain_file, "-f", problem_file, "-n", "1"]
-    else: 
+    if planner_path == "planificadores/metricff":
         cmd = [planner_path, "-o", domain_file, "-f", problem_file]
+    else:
+        if (planner_path in ["seq-sat-fdss-2", "seq-opt-fdss-2"]) :
+            cmd = ["planificadores/fast-downward.sif", "--alias", planner_path, "--overall-time", "55", domain_file, problem_file]
+        else:
+            cmd = ["planificadores/fast-downward.sif", "--alias", planner_path, domain_file, problem_file]
     
     print(f"Running command: {' '.join(cmd)}")
     
@@ -120,18 +115,26 @@ def run_planner(domain_file, problem_file, planner_path, time_limit_seconds=60):
             print(f"Stdout first 300 chars: {result.stdout[:300]}")
             print(f"Stderr first 300 chars: {result.stderr[:300]}")
             
+            # Extract plan cost - search for "plan cost:" or "Plan cost:" in stdout or stderr
+            plan_cost = None
+            combined_output = result.stdout + result.stderr
+            cost_match = re.search(r"[Pp][Ll][Aa][Nn]\s*[Cc][Oo][Ss][Tt]:\s*(\d+\.?\d*)", combined_output)
+            if cost_match:
+                plan_cost = float(cost_match.group(1))
+                print(f"Found plan cost: {plan_cost}")
+            
             # FF planner typically returns 0 for success and non-zero for failures
             if result.returncode != 0:
                 # Check if it's a legitimate "no solution exists" message
                 if "goal can be simplified to FALSE" in result.stderr or "goal can be simplified to FALSE" in result.stdout:
                     print("Planner determined that no solution exists for this problem")
-                    return None, execution_time
+                    return None, execution_time, None
                 elif "No plan will solve it" in result.stderr or "No plan will solve it" in result.stdout:
                     print("Planner determined that no solution exists for this problem")
-                    return None, execution_time
+                    return None, execution_time, None
                 else:
                     print(f"Planner failed with error code {result.returncode}")
-                    return None, execution_time
+                    return None, execution_time, None
             
             # Try to extract plan length from output
             plan_length = None
@@ -141,13 +144,13 @@ def run_planner(domain_file, problem_file, planner_path, time_limit_seconds=60):
             plan_match = re.search(r"found legal plan.+\n.+length: (\d+)", output, re.DOTALL)
             if plan_match:
                 plan_length = int(plan_match.group(1))
-                return plan_length, execution_time
+                return plan_length, execution_time, plan_cost
             
             # Also look for step count in the output
             step_count = len(re.findall(r"step\s+\d+:", output))
             if step_count > 0:
                 print(f"Found {step_count} steps in the plan")
-                return step_count, execution_time
+                return step_count, execution_time, plan_cost
             
             # Look for number of actions in the plan
             if "ff: found legal plan as follows" in output or "found legal plan as follows" in output:
@@ -155,17 +158,17 @@ def run_planner(domain_file, problem_file, planner_path, time_limit_seconds=60):
                 action_count = sum(1 for line in lines_after_plan if line.strip() and not line.startswith("plan cost:") and not line.startswith("time spent:"))
                 if action_count > 0:
                     print(f"Found {action_count} actions in the plan")
-                    return action_count, execution_time
+                    return action_count, execution_time, plan_cost
             
             # If no plan length found but return code was 0, assume success but report unknown length
             print("No plan length found in output despite successful return code")
-            return 0, execution_time  # Return 0 as length but mark as success
+            return 0, execution_time, plan_cost  # Return 0 as length but mark as success
     except TimeoutException:
         print(f"Planner timed out after {time_limit_seconds} seconds")
-        return None, time_limit_seconds
+        return None, time_limit_seconds, None
     except Exception as e:
         print(f"Exception running planner: {e}")
-        return None, time.time() - start_time
+        return None, time.time() - start_time, None
 
 def delete_problem_file(problem_file):
     """Delete the generated problem file."""
@@ -180,8 +183,15 @@ def delete_problem_file(problem_file):
         print(f"Eliminado: {file}")
 
 
-def plot_results(sizes, times, solutions_found, max_size):
-    """Create a plot of problem size vs. execution time."""
+def plot_results(sizes, times, costs, solutions_found, max_size, planner=""):
+    """Create plots of problem size vs. execution time and plan cost."""
+    if planner == "planificadores/metricff":
+        planner = planner.replace("planificadores/", "")
+    
+    # Ensure the results directory exists
+    os.makedirs('results', exist_ok=True)
+    
+    # Plot 1: Problem Size vs. Execution Time
     plt.figure(figsize=(10, 6))
     
     # Plot all points
@@ -193,7 +203,7 @@ def plot_results(sizes, times, solutions_found, max_size):
     
     plt.axhline(y=60, color='r', linestyle='--', label='Time Limit (60s)')
     
-    title = 'PDDL Planner Performance'
+    title = 'PDDL Planner Performance (Execution Time)'
     if max_size is not None:
         title += f' (Max Solvable Size: {max_size})'
     plt.title(title)
@@ -212,15 +222,62 @@ def plot_results(sizes, times, solutions_found, max_size):
     plt.legend(handles=legend_elements)
     
     # Save the plot
-    plt.savefig('planner_performance.png')
-    print("Plot saved as 'planner_performance.png'")
+    plt.savefig(f'results/planner_performance_time_{planner}.png')
+    print(f"Time plot saved as 'results/planner_performance_time_{planner}.png'")
+    
+    # Plot 2: Problem Size vs. Plan Cost (if costs are available)
+    if any(cost is not None for cost in costs):
+        plt.figure(figsize=(10, 6))
+        
+        # Filter out None values
+        valid_data = [(size, cost) for size, cost, solved in zip(sizes, costs, solutions_found) if cost is not None and solved]
+        
+        if valid_data:
+            valid_sizes, valid_costs = zip(*valid_data)
+            
+            # Plot all points
+            plt.scatter(valid_sizes, valid_costs, color='green', marker='o', s=100, label='Problem instances')
+            
+            # Connect the points with a line
+            plt.plot(valid_sizes, valid_costs, linestyle='-', color='blue', alpha=0.5)
+            
+            title = 'PDDL Planner Performance (Plan Cost)'
+            if max_size is not None:
+                title += f' (Max Solvable Size: {max_size})'
+            plt.title(title)
+            
+            plt.xlabel('Problem Size (number of locations/persons/crates/goals)')
+            plt.ylabel('Plan Cost')
+            plt.grid(True)
+            
+            # Save the plot
+            plt.savefig(f'results/planner_performance_cost_{planner}.png')
+            print(f"Cost plot saved as 'results/planner_performance_cost_{planner}.png'")
 
-    # Also save results as CSV
-    with open('planner_results.csv', 'w') as f:
-        f.write('Problem Size,Execution Time (s),Solution Found\n')
-        for size, time_val, solved in zip(sizes, times, solutions_found):
-            f.write(f'{size},{time_val},{1 if solved else 0}\n')
-    print("Results also saved as 'planner_results.csv'")
+    # Save results as CSV
+    with open(f'results/planner_results_{planner}.csv', 'w') as f:
+        f.write('Problem Size,Execution Time (s),Plan Cost,Solution Found\n')
+        for size, time_val, cost, solved in zip(sizes, times, costs, solutions_found):
+            cost_str = str(cost) if cost is not None else "N/A"
+            f.write(f'{size},{time_val},{cost_str},{1 if solved else 0}\n')
+    print(f"Results saved as 'results/planner_results_{planner}.csv'")
+
+def limpiar_carpeta_problemas():
+    """
+    Elimina todos los archivos dentro de la carpeta problemasGenerados
+    """
+    carpeta = "problemasGenerados"
+    try:
+        if os.path.exists(carpeta):
+            for archivo in os.listdir(carpeta):
+                ruta_completa = os.path.join(carpeta, archivo)
+                if os.path.isfile(ruta_completa):
+                    os.remove(ruta_completa)
+            print(f"Se han eliminado todos los archivos de {carpeta}")
+        else:
+            print(f"La carpeta {carpeta} no existe")
+    except Exception as e:
+        print(f"Error al limpiar la carpeta: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description='Run PDDL tests with increasing complexity')
@@ -230,6 +287,7 @@ def main():
     parser.add_argument('--max-size', type=int, default=100, help='Maximum problem size to try')
     parser.add_argument('--timeout', type=int, default=60, help='Timeout in seconds')
     parser.add_argument('--continue-on-fail', action='store_true', help='Continue testing even after failures')
+    parser.add_argument('--step-size', type=int, default=1, help='Step size for increasing problem complexity')
     
     args = parser.parse_args()
     
@@ -241,15 +299,17 @@ def main():
     
     sizes = []
     times = []
+    costs = []
     solutions_found = []
     max_solvable_size = None
     
     print(f"Testing problems from size {args.start_size} to {args.max_size} with timeout {args.timeout}s")
+    print(f"Using step size of {args.step_size}")
     print("-" * 80)
     
     consecutive_failures = 0
     
-    for size in range(args.start_size, args.max_size + 1):
+    for size in range(args.start_size, args.max_size + 1, args.step_size):
         print(f"Testing problem of size {size}...")
         
         problem_file = generate_problem(
@@ -271,7 +331,7 @@ def main():
             continue
         
         print(f"Generated {problem_file}, running planner...")
-        plan_length, execution_time = run_planner(
+        plan_length, execution_time, plan_cost = run_planner(
             args.domain,
             problem_file,
             args.planner,
@@ -280,9 +340,11 @@ def main():
         
         sizes.append(size)
         times.append(execution_time)
+        costs.append(plan_cost)
         
         if plan_length is not None:
-            print(f"Size {size}: Found plan of length {plan_length} in {execution_time:.2f} seconds")
+            cost_str = f" with cost {plan_cost}" if plan_cost is not None else ""
+            print(f"Size {size}: Found plan of length {plan_length}{cost_str} in {execution_time:.2f} seconds")
             solutions_found.append(True)
             max_solvable_size = size
             consecutive_failures = 0
@@ -293,13 +355,18 @@ def main():
                 consecutive_failures += 1
                 if consecutive_failures >= 2:
                     print("Two consecutive failures in finding solutions, stopping tests")
-            break
+                    break
             
         delete_problem_file(problem_file)
         print("-" * 80)
+
+        # Al final de la función main, añade:
+        print("Limpiando archivos residuales...")
+        limpiar_carpeta_problemas()
+        print("Limpieza completada.")
     
     if sizes and times:
-        plot_results(sizes, times, solutions_found, max_solvable_size)
+        plot_results(sizes, times, costs, solutions_found, max_solvable_size, args.planner)
         if max_solvable_size:
             print(f"Maximum problem size solved within {args.timeout} seconds: {max_solvable_size}")
         else:
@@ -308,4 +375,9 @@ def main():
         print("No data collected, cannot create graph")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        # Esto garantiza que se limpien los archivos incluso si el programa termina con un error
+        print("Asegurando limpieza final...")
+        limpiar_carpeta_problemas()
