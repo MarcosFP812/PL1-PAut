@@ -47,6 +47,18 @@
     (siguiente n3 n4)
     
     (cajas-en-contenedor k1 n0)
+    (caja-libre caja1)
+    (caja-libre caja2)
+    (caja-libre caja3)
+    (caja-libre caja4)
+    (caja-libre caja5)
+    (caja-libre caja6)
+    (caja-libre caja7)
+    (caja-libre caja8)
+    (caja-libre caja9)
+    (caja-libre caja10)
+    (caja-libre caja11)
+    (dron-sin-caja dron1)
     
     (necesita pers1 comida)
 	(necesita pers1 medicina)

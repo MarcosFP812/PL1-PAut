@@ -48,6 +48,7 @@
     (caja-libre c5)
     (caja-libre c6)
     (caja-libre c7)
+    (dron-sin-caja d1)
     
     (= (fly-cost deposito deposito) 0)
     (= (fly-cost l1 l1) 0)
