@@ -194,13 +194,16 @@ def main():
             f.write("  (dron-sin-caja {})\n".format(d))
             f.write("\n")
 
-        # 2) Contenedores en el depósito y vacíos (cajas-en-contenedor k n0)
+        # 2) Establece el deposito como localización inicial
+        f.write("    (en-deposito deposito)\n")
+
+        # 3) Contenedores en el depósito y vacíos (cajas-en-contenedor k n0)
         for k in containers:
             f.write("  (contenedor-en {} deposito)\n".format(k))
             f.write("  (contenedor-libre {})\n".format(k))
             f.write("  (cajas-en-contenedor {} n0)\n".format(k))
 
-        # 3) Cajas en el depósito, libres
+        # 4) Cajas en el depósito, libres
         for i, group in enumerate(crates_with_contents):
             for c in group:
                 f.write("  (caja-en {} deposito)\n".format(c))
@@ -208,7 +211,7 @@ def main():
                 f.write("  (contiene {} {})\n".format(c, content_types[i]))
             f.write("\n")
 
-        # 4) Personas y necesidades
+        # 5) Personas y necesidades
         #   Asignamos persona-en persX locX+1 (salvo que quieras aleatorio)
         #   y (necesita persX contenido) según la matriz need
         for i, p in enumerate(people):
@@ -222,7 +225,7 @@ def main():
                     f.write("  (necesita {} {})\n".format(p, content_types[cont_i]))
             f.write("\n")
 
-        # 5) Definir los costes de vuelo (fly-cost locA locB)
+        # 6) Definir los costes de vuelo (fly-cost locA locB)
         for i in range(len(location_coords)):
             for j in range(len(location_coords)):
                 cost_value = flight_cost(location_coords, i, j)
@@ -230,14 +233,14 @@ def main():
                 loc_j = locations[j]
                 f.write("  (= (fly-cost {} {}) {})\n".format(loc_i, loc_j, cost_value))
 
-        # 6) Relación siguiente para n0->n1->n2->n3->n4
+        # 7) Relación siguiente para n0->n1->n2->n3->n4
         f.write("\n  (cero n0)\n")
         f.write("  (siguiente n0 n1)\n")
         f.write("  (siguiente n1 n2)\n")
         f.write("  (siguiente n2 n3)\n")
         f.write("  (siguiente n3 n4)\n")
 
-        # 7) Iniciar total-cost a 0
+        # 8) Iniciar total-cost a 0
         f.write("  (= (total-cost) 0)\n")
 
         f.write(")\n\n")
