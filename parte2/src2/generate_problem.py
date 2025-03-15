@@ -133,7 +133,7 @@ def main():
     with open(out_file, "w") as f:
         # Encabezado
         f.write(f"(define (problem {problem_name})\n")
-        f.write("(:domain dominio-drones-parte2)\n\n")
+        f.write("(:domain dominio-drones-2)\n\n")
 
         # Objetos
         f.write("(:objects\n")
@@ -190,9 +190,8 @@ def main():
         # Distancias => (fly-cost loc_i loc_j)
         for i in range(len(coords)):
             for j in range(len(coords)):
-                if i != j:
-                    costval = flight_cost(coords, i, j)
-                    f.write(f"  (= (fly-cost {location[i]} {location[j]}) {costval})\n")
+                costval = flight_cost(coords, i, j)
+                f.write(f"  (= (fly-cost {location[i]} {location[j]}) {costval})\n")
 
         # Relación siguiente n0->n1->n2->n3->n4
         f.write("\n  (cero n0)\n")
