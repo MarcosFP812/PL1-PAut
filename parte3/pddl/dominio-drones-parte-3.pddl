@@ -135,7 +135,6 @@
     :duration (= ?duration (+ 0.001 (fly-cost ?from ?to)))
     :condition (and
       (at start (dron-en ?d ?from))
-      (at start (not (= ?from ?to)))
       (over all (dron-sin-caja ?d))
     )
     :effect (and
