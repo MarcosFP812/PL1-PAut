@@ -21,6 +21,7 @@
     (dron-libre d1)
     (en-deposito deposito)
     (contenedor-libre k1)
+    (contenedor-en k1 deposito)
 
     (caja-en c1 deposito) (contiene c1 comida)
     (caja-en c2 deposito) (contiene c2 medicina)
