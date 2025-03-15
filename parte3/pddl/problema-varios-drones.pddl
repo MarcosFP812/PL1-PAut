@@ -2,12 +2,12 @@
   (:domain dominio-drones-3)
   
   (:objects
-    d1 d2 d3 - dron
+    d1 d2 - dron
     p1 p2 p3 p4 - persona
     deposito l1 l2 l3 l4 - localizacion
     c1 c2 c3 c4 c5 c6 c7 - caja
     comida medicina agua - contenido
-    k1 k2 k3 - contenedor
+    k1 k2 - contenedor
     n0 n1 n2 n3 n4 - num)
 
   (:init
@@ -19,17 +19,14 @@
     
     (dron-en d1 deposito)
     (dron-en d2 deposito)
-    (dron-en d3 deposito)
     (dron-libre d1)
     (dron-libre d2)
-    (dron-libre d3)
     (en-deposito deposito)
     (contenedor-libre k1)
     (contenedor-libre k2)
-    (contenedor-libre k3)
+    ;;(contenedor-libre k3)
     (contenedor-en k1 deposito)
     (contenedor-en k2 deposito)
-    (contenedor-en k3 deposito)
 
     (caja-en c1 deposito) (contiene c1 comida)
     (caja-en c2 deposito) (contiene c2 medicina)
@@ -51,7 +48,7 @@
     
     (cajas-en-contenedor k1 n0)
     (cajas-en-contenedor k2 n0)
-    (cajas-en-contenedor k3 n0)
+    ;;(cajas-en-contenedor k3 n0)
     (caja-libre c1)
     (caja-libre c2)
     (caja-libre c3)
@@ -61,7 +58,6 @@
     (caja-libre c7)
     (dron-sin-caja d1)
     (dron-sin-caja d2)
-    (dron-sin-caja d3)
     
     (= (fly-cost deposito deposito) 0)
     (= (fly-cost l1 l1) 0)
@@ -97,7 +93,6 @@
     (and
       (dron-en d1 deposito)
       (dron-en d2 deposito)
-      (dron-en d3 deposito)
       (tiene p1 comida)
       (tiene p2 medicina)
       (tiene p3 comida)

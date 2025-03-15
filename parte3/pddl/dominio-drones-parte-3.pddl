@@ -9,6 +9,7 @@
     ;; Posición y estado de drones, cajas y personas
     (dron-en ?d - dron ?l - localizacion)
     (caja-en ?c - caja ?l - localizacion)
+    (contenedor-en ?k - contenedor ?l - localizacion)
     (persona-en ?p - persona ?l - localizacion)
     (en-deposito ?l - localizacion)
 
@@ -45,6 +46,7 @@
     :condition (and
       (at start (dron-libre ?d))
       (at start (contenedor-libre ?k))
+      (at start (contenedor-en ?k ?l))
       (over all (dron-en ?d ?l))
       (over all (en-deposito ?l))
       (over all (cero ?n))
@@ -54,6 +56,7 @@
       (at start (not (dron-libre ?d)))
       (at start (cajas-en-contenedor ?k ?n))
       (at end (tiene-contenedor ?d ?k))
+      (at end (not (contenedor-en ?k ?l)))
     )
   )
 
@@ -71,6 +74,7 @@
       (at start (not (tiene-contenedor ?d ?k)))
       (at end (dron-libre ?d))
       (at end (contenedor-libre ?k))
+      (at end (contenedor-en ?k ?l))
     )
   )
 
