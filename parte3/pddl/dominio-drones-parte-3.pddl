@@ -110,6 +110,26 @@
     )
   )
 
+  (:durative-action sacar
+    :parameters (?d - dron ?c - caja ?k - contenedor ?n1 ?n2 - num)
+    :duration (= ?duration 1)
+    :condition (and
+      (at start (en-contenedor ?k ?c))
+      (at start (dron-sin-caja ?d))
+      (at start (cajas-en-contenedor ?k ?n2))
+
+      (over all (tiene-contenedor ?d ?k))
+      (over all (siguiente ?n1 ?n2))
+    )
+    :effect (and
+      (at start (not (en-contenedor ?k ?c)))
+      (at start (not (cajas-en-contenedor ?k ?n2)))
+      (at end (tiene-caja ?d ?c))
+      (at end (not (dron-sin-caja ?d)))
+      (at end (cajas-en-contenedor ?k ?n1))
+    )
+  )
+
   (:durative-action volar
     :parameters (?d - dron ?from - localizacion ?to - localizacion)
     :duration (= ?duration (+ 0.001 (fly-cost ?from ?to)))
