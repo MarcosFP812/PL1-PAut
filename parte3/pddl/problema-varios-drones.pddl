@@ -27,6 +27,9 @@
     (contenedor-libre k1)
     (contenedor-libre k2)
     (contenedor-libre k3)
+    (contenedor-en k1 deposito)
+    (contenedor-en k2 deposito)
+    (contenedor-en k3 deposito)
 
     (caja-en c1 deposito) (contiene c1 comida)
     (caja-en c2 deposito) (contiene c2 medicina)
