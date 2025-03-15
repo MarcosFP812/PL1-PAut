@@ -1,174 +1,145 @@
-(define (domain dominio-drones-2)
-  (:requirements :strips :typing :durative-actions)
+(define (domain dominio-drones-3)
+  (:requirements :strips :typing :durative-actions :fluents :numeric-fluents :action-costs)
 
-  (:types
-    dron persona localizacion caja contenido contenedor num)
+  ;; Tipos de objetos
+  (:types dron persona localizacion caja contenido contenedor num)
 
+  ;; Predicados
   (:predicates
+    ;; Posición y estado de drones, cajas y personas
     (dron-en ?d - dron ?l - localizacion)
     (caja-en ?c - caja ?l - localizacion)
     (persona-en ?p - persona ?l - localizacion)
     (en-deposito ?l - localizacion)
 
+    ;; Contenido de cajas y pertenencias
     (tiene ?p - persona ?t - contenido)
     (contiene ?c - caja ?t - contenido)
-    (contenedor-libre ?k - contenedor) 
-    
+    (contenedor-libre ?k - contenedor)
     (necesita ?p - persona ?t - contenido)
 
+    ;; Relación dron - contenedor
     (tiene-contenedor ?d - dron ?k - contenedor)
     (en-contenedor ?k - contenedor ?c - caja)
     (dron-libre ?d - dron)
-    
     (tiene-caja ?d - dron ?c - caja)
     (caja-libre ?c - caja)
     (dron-sin-caja ?d - dron)
-  
+
+    ;; Numeración para gestión de cajas
     (siguiente ?n1 - num ?n2 - num)
     (cajas-en-contenedor ?k - contenedor ?n - num)
     (cero ?n - num)
   )
 
+  ;; Funciones
   (:functions
     (fly-cost ?l1 - localizacion ?l2 - localizacion)
     (total-cost)
   )
 
-  ;; acciones contenedor
+  ;; Acciones relacionadas con contenedores
   (:durative-action coger
-    :parameters (
-      ?d - dron 
-      ?k - contenedor 
-      ?l - localizacion
-      ?n - num
-    )
+    :parameters (?d - dron ?k - contenedor ?l - localizacion ?n - num)
     :duration (= ?duration 1)
     :condition (and
-      (at start ( and (dron-libre ?d)
-      (contenedor-libre ?k)))
-      (over all (and (dron-en ?d ?l)
-      (en-deposito ?l) (cero ?n))
+      (at start (dron-libre ?d))
+      (at start (contenedor-libre ?k))
+      (over all (dron-en ?d ?l))
+      (over all (en-deposito ?l))
+      (over all (cero ?n))
     )
-    :effect (and (at start ( and
-      (not (contenedor-libre ?k))
-      (not (dron-libre ?d))
-      (cajas-en-contenedor ?k ?n)))
+    :effect (and
+      (at start (not (contenedor-libre ?k)))
+      (at start (not (dron-libre ?d)))
+      (at start (cajas-en-contenedor ?k ?n))
       (at end (tiene-contenedor ?d ?k))
     )
   )
 
   (:durative-action dejar
-    :parameters (
-      ?d - dron 
-      ?k - contenedor 
-      ?l - localizacion
-      ? n - num
-    )
+    :parameters (?d - dron ?k - contenedor ?l - localizacion ?n - num)
     :duration (= ?duration 1)
     :condition (and
-      (at start ( and (tiene-contenedor ?d ?k)
-      (cero ?n)
-      (cajas-en-contenedor ?k ?n)))
-      (over all (and (dron-en ?d ?l)
-      (en-deposito ?l)))
+      (at start (tiene-contenedor ?d ?k))
+      (at start (cero ?n))
+      (at start (cajas-en-contenedor ?k ?n))
+      (over all (dron-en ?d ?l))
+      (over all (en-deposito ?l))
     )
     :effect (and
       (at start (not (tiene-contenedor ?d ?k)))
-      (at end (and (dron-libre ?d) (contenedor-libre ?k)))
+      (at end (dron-libre ?d))
+      (at end (contenedor-libre ?k))
     )
   )
 
-  ;; acciones caja y vuelo
-
+  ;; Acciones de cajas y vuelo
   (:durative-action coger-caja
-    :parameters (
-      ?d - dron 
-      ?c - caja 
-      ?l - localizacion
-    )
+    :parameters (?d - dron ?c - caja ?l - localizacion)
     :duration (= ?duration 1)
     :condition (and
-      (at start( and (caja-en ?c ?l) (dron-sin-caja ?d) (caja-libre ?c)))
-      (over all( dron-en ?d ?l ))
+      (at start (caja-en ?c ?l))
+      (at start (dron-sin-caja ?d))
+      (at start (caja-libre ?c))
+      (over all (dron-en ?d ?l))
     )
     :effect (and
-      (at start( and (not (dron-sin-caja ?d)) (not (caja-libre ?c)) (not (caja-en ?c ?l)) ))
-      (at end( and (tiene-caja ?d ?c)  ))
+      (at start (not (caja-en ?c ?l)))
+      (at start (not (caja-libre ?c)))
+      (at start (not (dron-sin-caja ?d)))
+      (at end (tiene-caja ?d ?c))
     )
   )
 
   (:durative-action meter
-    :parameters (
-      ?d - dron 
-      ?c - caja 
-      ?k - contenedor
-      ?n1 ?n2 - num
-    )
-    :duration (= ?duration 1)
-    :condition (and 
-      (at start (and (tiene-caja ?d ?c) (cajas-en-contenedor ?k ?n1) ))
-      (over all ( and ( (tiene-contenedor ?d ?k) (siguiente ?n1 ?n2) ))
-    )
-    :effect (and 
-      (at start(and (en-contenedor ?k ?c) (not (cajas-en-contenedor ?k ?n1)) ))
-      (at end(and (not (tiene-caja ?d ?c)) (dron-sin-caja ?d) (cajas-en-contenedor ?k ?n2) ))
-    )
-  )
-
-  (:durative-action sacar
-    :parameters (
-      ?d - dron 
-      ?c - caja 
-      ?k - contenedor
-      ?n1 ?n2 - num
-    )
+    :parameters (?d - dron ?c - caja ?k - contenedor ?n1 ?n2 - num)
     :duration (= ?duration 1)
     :condition (and
-      (at start (and  (en-contenedor ?k ?c) (dron-sin-caja ?d) (cajas-en-contenedor ?k ?n2) ))
-      (over all ( and ( (tiene-contenedor ?d ?k) (siguiente ?n1 ?n2) ))
+      (at start (tiene-caja ?d ?c))
+      (at start (cajas-en-contenedor ?k ?n1))
+      (over all (tiene-contenedor ?d ?k))
+      (over all (siguiente ?n1 ?n2))
     )
     :effect (and
-      (at start(and  (not (en-contenedor ?k ?c))  (not (cajas-en-contenedor ?k ?n2)) ))
-      (at end(and (tiene-caja ?d ?c) (not (dron-sin-caja ?d)) (cajas-en-contenedor ?k ?n1) ))
+      (at start (en-contenedor ?k ?c))
+      (at start (not (cajas-en-contenedor ?k ?n1)))
+      (at end (not (tiene-caja ?d ?c)))
+      (at end (dron-sin-caja ?d))
+      (at end (cajas-en-contenedor ?k ?n2))
     )
   )
 
   (:durative-action volar
-    :parameters (
-      ?d - dron 
-      ?from - localizacion 
-      ?to - localizacion
-    )
-    :duration (= ?duration (fly-cost ?from ?to))
-    :condition ( at start(dron-en ?d ?from))
+    :parameters (?d - dron ?from - localizacion ?to - localizacion)
+    :duration (= ?duration (+ 0.001 (fly-cost ?from ?to)))
+    :condition (and
+      (at start (dron-en ?d ?from))
+      (at start (not (= ?from ?to)))
       (over all (dron-sin-caja ?d))
     )
-    :effect (and 
-      (at start(not (dron-en ?d ?from)))
-      (at end ( and (dron-en ?d ?to) (increase total-cost (fly-cost ?from ?to)) ))
+    :effect (and
+      (at start (not (dron-en ?d ?from)))
+      (at end (dron-en ?d ?to))
+      (at end (increase (total-cost) (fly-cost ?from ?to)))
     )
   )
 
   (:durative-action entregar
-    :parameters (
-      ?d - dron 
-      ?c - caja 
-      ?p - persona 
-      ?l - localizacion 
-      ?t - contenido
-    )
+    :parameters (?d - dron ?c - caja ?p - persona ?l - localizacion ?t - contenido)
     :duration (= ?duration 1)
-    :condition (and 
-      (at start( and (tiene-caja ?d ?c) (necesita ?p ?t)))
-      (over all( and(dron-en ?d ?l) 
-      (persona-en ?p ?l)              
-      (contiene ?c ?t) ))
+    :condition (and
+      (at start (tiene-caja ?d ?c))
+      (at start (necesita ?p ?t))
+      (over all (dron-en ?d ?l))
+      (over all (persona-en ?p ?l))
+      (over all (contiene ?c ?t))
     )
     :effect (and
-      (at start( and (tiene ?p ?t)
-      (not (necesita ?p ?t))))
-      (at end( and (not (tiene-caja ?d ?c))
-      (dron-sin-caja ?d)))
+      (at start (tiene ?p ?t))
+      (at start (not (necesita ?p ?t)))
+      (at end (not (tiene-caja ?d ?c)))
+      (at end (dron-sin-caja ?d))
     )
   )
 )
