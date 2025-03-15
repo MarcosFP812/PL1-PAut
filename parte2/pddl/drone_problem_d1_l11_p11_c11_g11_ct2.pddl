@@ -15,6 +15,7 @@
 
 	(en-deposito deposito) 
 	(contenedor-libre k1)
+        (contenedor-en k1 deposito)
 	(caja-en caja1 deposito) (contiene caja1 comida)
 	(caja-en caja2 deposito) (contiene caja2 comida)
 	(caja-en caja3 deposito) (contiene caja3 comida)
