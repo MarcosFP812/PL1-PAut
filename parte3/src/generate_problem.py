@@ -140,7 +140,7 @@ def main():
     output_file = os.path.join(options.output, problem_name + ".pddl")
     with open(output_file, "w") as f:
         f.write("(define (problem {})\n".format(problem_name))
-        f.write("(:domain dominio-drones-parte2)\n\n")
+        f.write("(:domain dominio-drones-3)\n\n")
 
         # ------------------------------------------------------
         # Objetos
@@ -225,11 +225,10 @@ def main():
         # 5) Definir los costes de vuelo (fly-cost locA locB)
         for i in range(len(location_coords)):
             for j in range(len(location_coords)):
-                if i != j:
-                    cost_value = flight_cost(location_coords, i, j)
-                    loc_i = locations[i]
-                    loc_j = locations[j]
-                    f.write("  (= (fly-cost {} {}) {})\n".format(loc_i, loc_j, cost_value))
+                cost_value = flight_cost(location_coords, i, j)
+                loc_i = locations[i]
+                loc_j = locations[j]
+                f.write("  (= (fly-cost {} {}) {})\n".format(loc_i, loc_j, cost_value))
 
         # 6) Relación siguiente para n0->n1->n2->n3->n4
         f.write("\n  (cero n0)\n")
