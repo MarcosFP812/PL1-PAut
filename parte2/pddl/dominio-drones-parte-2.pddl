@@ -7,6 +7,7 @@
   (:predicates
     (dron-en ?d - dron ?l - localizacion)
     (caja-en ?c - caja ?l - localizacion)
+    (contenedor-en ?k - contenedor ?l - localizacion)
     (persona-en ?p - persona ?l - localizacion)
     (en-deposito ?l - localizacion)
 
@@ -46,12 +47,14 @@
       (en-deposito ?l)
       (dron-libre ?d)
       (contenedor-libre ?k)
+      (contenedor-en ?k ?l)
       (cero ?n)
     )
     :effect (and
       (tiene-contenedor ?d ?k)
       (not (dron-libre ?d))
       (not (contenedor-libre ?k))
+      (not (contenedor-en ?k ?l))
       (cajas-en-contenedor ?k ?n)
     )
   )
@@ -73,6 +76,7 @@
     :effect (and
       (not (tiene-contenedor ?d ?k))
       (dron-libre ?d)
+      (contenedor-en ?k ?l)
       (contenedor-libre ?k)
     )
   )
