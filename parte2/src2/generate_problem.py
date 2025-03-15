@@ -160,7 +160,10 @@ def main():
             f.write(f"  (dron-en {d} deposito)\n")
             f.write(f"  (dron-libre {d})\n")
             f.write(f"  (dron-sin-caja {d})\n\n")
-
+          
+        # Establece el deposito como localización inicial
+        f.write("    (en-deposito deposito)\n")
+      
         # Contenedores en depósito, libres
         for k in container:
             f.write(f"  (contenedor-en {k} deposito)\n")
