@@ -1,1 +1,1 @@
-planificadores/optic-clp pddl/dominio-drones-parte-3.pddl pddl/problema-parte-3.pddl
+planificadores/optic-clp -N pddl/dominio-drones-parte-3.pddl drone_problem_d2_l8_p8_c10_g8_ct2.pddl

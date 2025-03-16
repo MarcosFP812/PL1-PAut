@@ -1,0 +1,1 @@
+python3 src/test_planiffier.py --experiment "fixed_drones"
