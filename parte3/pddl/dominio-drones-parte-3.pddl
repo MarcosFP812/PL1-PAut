@@ -46,15 +46,15 @@
     :condition (and
       (at start (dron-libre ?d))
       (at start (contenedor-libre ?k))
-      (at start (contenedor-en ?k ?l))
+      (over all (contenedor-en ?k ?l))
       (over all (dron-en ?d ?l))
       (over all (en-deposito ?l))
+      (over all (cajas-en-contenedor ?k ?n))
       (over all (cero ?n))
     )
     :effect (and
       (at start (not (contenedor-libre ?k)))
       (at start (not (dron-libre ?d)))
-      (at start (cajas-en-contenedor ?k ?n))
       (at end (tiene-contenedor ?d ?k))
       (at end (not (contenedor-en ?k ?l)))
     )
@@ -65,10 +65,10 @@
     :duration (= ?duration 1)
     :condition (and
       (at start (tiene-contenedor ?d ?k))
-      (at start (cero ?n))
-      (at start (cajas-en-contenedor ?k ?n))
       (over all (dron-en ?d ?l))
       (over all (en-deposito ?l))
+      (over all (cajas-en-contenedor ?k ?n))
+      (over all (cero ?n))
     )
     :effect (and
       (at start (not (tiene-contenedor ?d ?k)))
